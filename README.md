@@ -1,3 +1,7 @@
+<p align="center">
+  <img alt="Web client demo" src="./demos/client.png">
+</p>
+
 # ChatGPT Web Client
 
 This is a web client for [waylaidwanderer/node-chatgpt-api](https://github.com/waylaidwanderer/node-chatgpt-api)'s API server, built using [Nuxt 3](https://v3.nuxtjs.org/), a Vue 3 framework.

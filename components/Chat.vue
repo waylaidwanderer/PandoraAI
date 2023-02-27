@@ -25,6 +25,14 @@ const scrollToBottom = () => {
     messagesContainerElement.value.scrollTop = messagesContainerElement.value.scrollHeight;
 };
 
+const stopProcessing = () => {
+    if (!processingController.value) {
+        return;
+    }
+    processingController.value.abort();
+    processingController.value = null;
+};
+
 const sendMessage = async (input) => {
     if (processingController.value) {
         return;
@@ -72,10 +80,9 @@ const sendMessage = async (input) => {
     };
 
     try {
-        const controller = processingController.value;
         await fetchEventSource(`${config.apiBaseUrl}/conversation`, {
             ...opts,
-            signal: controller.signal,
+            signal: processingController.value.signal,
             onopen(response) {
                 if (response.status === 200) {
                     return;
@@ -89,10 +96,8 @@ const sendMessage = async (input) => {
                 throw err;
             },
             onmessage(message) {
-                console.log(message);
-                // { data: 'Hello', event: '', id: '', retry: undefined }
                 if (message.data === '[DONE]') {
-                    controller.abort();
+                    processingController.value.abort();
                     return;
                 }
                 if (message.event === 'result') {
@@ -182,19 +187,38 @@ onUnmounted(() => {
             ref="inputContainerElement"
             class="w-full mx-auto max-w-4xl px-3 flex flex-row absolute left-0 right-0 h-[67px] z-10"
         >
-            <textarea
-                rows="1"
-                v-model="message"
-                @keydown.enter.exact.prevent="sendMessage(message)"
-                placeholder="Type your message here..."
-                class="p-3 rounded-sm text-slate-100 w-full bg-white/5 backdrop-blur-sm placeholder-white/40 shadow-inner shadow focus:outline-none"
-            />
-            <button
-                @click="sendMessage(message)"
-                class="py-3 px-7 bg-white/10 backdrop-blur-sm text-slate-300 shadow rounded-sm ml-3 transition duration-300 ease-in-out hover:bg-white/20"
-            >
-                Send
-            </button>
+            <div class="relative flex flex-row w-full">
+                <div class="flex items-center justify-center absolute w-full -top-12">
+                    <button
+                        v-if="processingController"
+                        @click="stopProcessing"
+                        class="py-2 px-4 bg-white/10 backdrop-blur-sm text-slate-300 text-sm shadow rounded ml-3 transition duration-300 ease-in-out hover:bg-white/20"
+                    >
+                        Stop
+                    </button>
+                </div>
+                <textarea
+                    rows="1"
+                    v-model="message"
+                    @keydown.enter.exact.prevent="sendMessage(message)"
+                    placeholder="Type your message here..."
+                    :disabled="!!processingController"
+                    class="p-3 rounded-sm text-slate-100 w-full bg-white/5 backdrop-blur-sm placeholder-white/40 shadow-inner shadow focus:outline-none"
+                    :class="{
+                        'opacity-50 cursor-not-allowed': !!processingController,
+                    }"
+                />
+                <button
+                    @click="sendMessage(message)"
+                    :disabled="!!processingController"
+                    class="py-3 px-7 bg-white/10 backdrop-blur-sm text-slate-300 shadow rounded-sm ml-3 transition duration-300 ease-in-out hover:bg-white/20"
+                    :class="{
+                        'opacity-50 cursor-not-allowed hover:bg-white/10': !!processingController,
+                    }"
+                >
+                    Send
+                </button>
+            </div>
         </div>
     </div>
 </template>

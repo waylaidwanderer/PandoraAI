@@ -244,10 +244,15 @@ onUnmounted(() => {
 .prose pre {
     padding: 0;
     margin: 0;
+    white-space: pre-wrap;
 }
 
 .prose pre code {
     background-color: transparent;
     @apply text-xs;
+}
+
+.prose pre code .hljs-comment {
+    @apply text-slate-500;
 }
 </style>

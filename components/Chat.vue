@@ -156,6 +156,7 @@ onMounted(() => {
 
 onUnmounted(() => {
     window.removeEventListener('resize', setChatContainerHeight);
+    stopProcessing();
 });
 </script>
 

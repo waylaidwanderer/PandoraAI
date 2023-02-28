@@ -113,7 +113,8 @@ const sendMessage = async (input) => {
                             parentMessageId: result.messageId,
                         };
                     }
-                    botMessage.text = result.details.adaptiveCards?.[0]?.body?.[0]?.text?.trim() || result.text;
+                    //console.log(result);
+                    botMessage.text = result.details.adaptiveCards?.[0]?.body?.[0]?.text?.trim() || result.response;
                     botMessage.raw = result;
                     nextTick().then(() => scrollToBottom());
                     return;

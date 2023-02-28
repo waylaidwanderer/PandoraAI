@@ -113,8 +113,14 @@ const sendMessage = async (input) => {
                             parentMessageId: result.messageId,
                         };
                     }
-                    //console.log(result);
-                    botMessage.text = result.details.adaptiveCards?.[0]?.body?.[0]?.text?.trim() || result.response;
+                    console.debug(result);
+                    const adaptiveText = result.details.adaptiveCards?.[0]?.body?.[0]?.text?.trim();
+                    if (adaptiveText) {
+                        console.debug('adaptiveText', adaptiveText);
+                        botMessage.text = adaptiveText;
+                    } else {
+                        botMessage.text = result.response;
+                    }
                     botMessage.raw = result;
                     nextTick().then(() => scrollToBottom());
                     return;

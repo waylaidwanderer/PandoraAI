@@ -100,7 +100,7 @@ const sendMessage = async (input) => {
                 }
                 if (message.event === 'result') {
                     const result = JSON.parse(message.data);
-                    if (result.conversationSignature && !result.parentMessageId) {
+                    if (result.conversationSignature && !result.messageId) {
                         conversationData.value = {
                             conversationId: result.conversationId,
                             conversationSignature: result.conversationSignature,
@@ -113,7 +113,7 @@ const sendMessage = async (input) => {
                             parentMessageId: result.messageId,
                         };
                     }
-                    botMessage.text = result.response;
+                    botMessage.text = result.details.adaptiveCards?.[0]?.body?.[0]?.text?.trim() || result.text;
                     botMessage.raw = result;
                     nextTick().then(() => scrollToBottom());
                     return;

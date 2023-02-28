@@ -16,8 +16,7 @@ const messages = ref([]);
 const message = ref('');
 const processingController = ref(null);
 
-const conversationId = ref(null);
-const parentMessageId = ref(null);
+const conversationData = ref({});
 const messagesContainerElement = ref(null);
 const inputContainerElement = ref(null);
 
@@ -72,9 +71,8 @@ const sendMessage = async (input) => {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+            ...conversationData.value,
             message: input,
-            conversationId: conversationId.value,
-            parentMessageId: parentMessageId.value,
             stream: true,
         }),
     };
@@ -102,8 +100,19 @@ const sendMessage = async (input) => {
                 }
                 if (message.event === 'result') {
                     const result = JSON.parse(message.data);
-                    conversationId.value = result.conversationId;
-                    parentMessageId.value = result.messageId;
+                    if (result.conversationSignature && !result.parentMessageId) {
+                        conversationData.value = {
+                            conversationId: result.conversationId,
+                            conversationSignature: result.conversationSignature,
+                            clientId: result.clientId,
+                            invocationId: result.invocationId,
+                        };
+                    } else {
+                        conversationData.value = {
+                            conversationId: result.conversationId,
+                            parentMessageId: result.messageId,
+                        };
+                    }
                     botMessage.text = result.response;
                     botMessage.raw = result;
                     nextTick().then(() => scrollToBottom());
@@ -177,7 +186,7 @@ onUnmounted(() => {
                         <!-- message text -->
                         <div
                             class="prose prose-sm prose-invert prose-blockquote:border-l-white/50 max-w-6xl"
-                            v-html="message.role === 'user' || message.raw ? md.render(message.text) : md.render(`${message.text}█`)"
+                            v-html="(message.role === 'user' || message.raw) ? md.render(message.text) : md.render(`${message.text}█`)"
                         />
                     </div>
                 </div>
@@ -242,9 +251,7 @@ onUnmounted(() => {
 }
 
 .prose pre {
-    padding: 0;
-    margin: 0;
-    white-space: pre-wrap;
+    @apply m-0 my-2 p-0 whitespace-pre-wrap;
 }
 
 .prose pre code {

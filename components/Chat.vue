@@ -231,7 +231,7 @@ if (!process.server) {
                     >
                         <!-- role name -->
                         <div
-                            class="text-xs text-white/50"
+                            class="text-xs text-white/50 mb-1"
                         >
                             {{ message.role }}
                         </div>

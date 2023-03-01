@@ -25,6 +25,7 @@ const config = useRuntimeConfig();
 const messages = ref([]);
 const message = ref('');
 const processingController = ref(null);
+const suggestedResponses = ref([]);
 
 const conversationData = ref({});
 const messagesContainerElement = ref(null);
@@ -53,6 +54,7 @@ const sendMessage = async (input) => {
         return;
     }
 
+    suggestedResponses.value = [];
     processingController.value = new AbortController();
 
     message.value = '';
@@ -107,7 +109,6 @@ const sendMessage = async (input) => {
                 throw err;
             },
             onmessage(message) {
-                console.log(message);
                 if (message.data === '[DONE]') {
                     processingController.value.abort();
                     return;
@@ -136,6 +137,9 @@ const sendMessage = async (input) => {
                         botMessage.text = result.response;
                     }
                     botMessage.raw = result;
+                    if (result.details.suggestedResponses) {
+                        suggestedResponses.value = result.details.suggestedResponses.map(response => response.text);
+                    }
                     nextTick().then(() => scrollToBottom());
                     return;
                 }
@@ -245,13 +249,21 @@ if (!process.server) {
             class="w-full mx-auto max-w-4xl px-3 flex flex-row absolute left-0 right-0 h-[67px] z-10"
         >
             <div class="relative flex flex-row w-full">
-                <div class="flex items-center justify-center absolute w-full -top-12">
+                <div class="flex gap-2 items-center justify-center absolute w-full -top-12">
                     <button
                         v-if="processingController"
                         @click="stopProcessing"
-                        class="py-2 px-4 bg-white/10 backdrop-blur-sm text-slate-300 text-sm shadow rounded ml-3 transition duration-300 ease-in-out hover:bg-white/20"
+                        class="py-2 px-4 bg-white/10 backdrop-blur-sm text-slate-300 text-sm shadow rounded transition duration-300 ease-in-out hover:bg-white/20"
                     >
                         Stop
+                    </button>
+                    <button
+                        v-for="response in suggestedResponses"
+                        :key="response"
+                        @click="sendMessage(response)"
+                        class="py-2 px-4 bg-white/10 backdrop-blur-sm text-slate-300 text-sm shadow rounded transition duration-300 ease-in-out hover:bg-white/20"
+                    >
+                        {{ response }}
                     </button>
                 </div>
                 <textarea

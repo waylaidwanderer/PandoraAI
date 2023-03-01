@@ -173,7 +173,12 @@ const parseMarkdown = (text) => {
     if (codeBlockCount % 2 === 1 && !text.endsWith('```')) {
         text += '\n```';
     }
-    return marked.parse(text);
+    let parsed = marked.parse(text);
+    // format Bing's source links more nicely
+    // 1. replace "[^1^]" with "[1]" (during progress streams)
+    parsed = parsed.replace(/\[\^(\d+)\^]/g, '<strong>[$1]</strong>');
+    // 2. replace "^1^" with "[1]" (after the progress stream is done)
+    return parsed.replace(/\^(\d+)\^/g, '<strong>[$1]</strong>');
 };
 
 onMounted(() => {

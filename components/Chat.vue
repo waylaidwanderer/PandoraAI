@@ -195,6 +195,10 @@ const parseMarkdown = (text, streaming = false) => {
             text += '\n```';
         }
     }
+    if (codeBlockCount) {
+        // make sure the last "```" is on a newline
+        text = text.replace(/```$/, '\n```');
+    }
     // convert to markdown
     let parsed = marked.parse(text);
     // format Bing's source links more nicely

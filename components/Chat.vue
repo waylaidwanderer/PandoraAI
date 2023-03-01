@@ -1,14 +1,23 @@
 <script setup>
 import { fetchEventSource } from '@microsoft/fetch-event-source';
-import MarkdownIt from 'markdown-it';
-import MarkdownItHighlight from 'markdown-it-highlightjs';
+import { marked } from 'marked';
+import hljs from 'highlight.js';
 
-const md = new MarkdownIt({
-    html: true,
-    linkify: true,
-    typographer: true,
+marked.setOptions({
+    silent: true,
+    xhtml: true,
+    breaks: true,
+    gfm: true,
+    highlight: (code, lang) => {
+        try {
+            return hljs.highlightAuto(code).value;
+        } catch {
+            const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+            return hljs.highlight(code, { language }).value;
+        }
+    },
+    langPrefix: 'hljs language-',
 });
-md.use(MarkdownItHighlight);
 
 const config = useRuntimeConfig();
 
@@ -194,7 +203,7 @@ onUnmounted(() => {
                         <!-- message text -->
                         <div
                             class="prose prose-sm prose-invert prose-blockquote:border-l-white/50 max-w-6xl"
-                            v-html="(message.role === 'user' || message.raw) ? md.render(message.text) : md.render(`${message.text}█`)"
+                            v-html="(message.role === 'user' || message.raw) ? marked.parse(message.text) : marked.parse(`${message.text}█`)"
                         />
                     </div>
                 </div>

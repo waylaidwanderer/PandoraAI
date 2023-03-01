@@ -343,4 +343,8 @@ if (!process.server) {
 .prose pre code .hljs-comment {
     @apply text-slate-500;
 }
+
+.prose p {
+    word-break: break-word;
+}
 </style>

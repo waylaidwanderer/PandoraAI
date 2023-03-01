@@ -238,7 +238,7 @@ if (!process.server) {
                         <!-- message text -->
                         <div
                             class="prose prose-sm prose-invert prose-blockquote:border-l-white/50 max-w-6xl"
-                            v-html="(message.role === 'user' || message.raw) ? parseMarkdown(message.text) : parseMarkdown(`${message.text}█`)"
+                            v-html="(message.role === 'user' || message.raw) ? parseMarkdown(message.text) : parseMarkdown(`${message.text.trim()}█`)"
                         />
                     </div>
                 </div>

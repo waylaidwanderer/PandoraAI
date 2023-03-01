@@ -1,6 +1,7 @@
 <script setup>
 import { fetchEventSource } from '@microsoft/fetch-event-source';
 import { marked } from 'marked';
+import DOMPurify from 'isomorphic-dompurify';
 import hljs from 'highlight.js';
 
 marked.setOptions({
@@ -180,12 +181,14 @@ const parseMarkdown = (text) => {
     if (codeBlockCount % 2 === 1 && !text.endsWith('```')) {
         text += '\n```';
     }
+    // convert to markdown
     let parsed = marked.parse(text);
     // format Bing's source links more nicely
     // 1. replace "[^1^]" with "[1]" (during progress streams)
     parsed = parsed.replace(/\[\^(\d+)\^]/g, '<strong>[$1]</strong>');
     // 2. replace "^1^" with "[1]" (after the progress stream is done)
-    return parsed.replace(/\^(\d+)\^/g, '<strong>[$1]</strong>');
+    parsed = parsed.replace(/\^(\d+)\^/g, '<strong>[$1]</strong>');
+    return DOMPurify.sanitize(parsed);
 };
 
 if (!process.server) {

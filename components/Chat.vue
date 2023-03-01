@@ -181,15 +181,17 @@ const parseMarkdown = (text) => {
     return parsed.replace(/\^(\d+)\^/g, '<strong>[$1]</strong>');
 };
 
-onMounted(() => {
-    window.addEventListener('resize', setChatContainerHeight);
-    setChatContainerHeight();
-});
+if (!process.server) {
+    onMounted(() => {
+        window.addEventListener('resize', setChatContainerHeight);
+        setChatContainerHeight();
+    });
 
-onUnmounted(() => {
-    window.removeEventListener('resize', setChatContainerHeight);
-    stopProcessing();
-});
+    onUnmounted(() => {
+        window.removeEventListener('resize', setChatContainerHeight);
+        stopProcessing();
+    });
+}
 </script>
 
 <template>

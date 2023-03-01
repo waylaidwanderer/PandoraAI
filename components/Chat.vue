@@ -199,6 +199,10 @@ const parseMarkdown = (text, streaming = false) => {
         // make sure the last "```" is on a newline
         text = text.replace(/```$/, '\n```');
     }
+    if (streaming && !cursorAdded) {
+        text += '█';
+    }
+
     // convert to markdown
     let parsed = marked.parse(text);
     // format Bing's source links more nicely
@@ -207,11 +211,7 @@ const parseMarkdown = (text, streaming = false) => {
     // 2. replace "^1^" with "[1]" (after the progress stream is done)
     parsed = parsed.replace(/\^(\d+)\^/g, '<strong>[$1]</strong>');
 
-    const sanitized = DOMPurify.sanitize(parsed);
-    if (!streaming || cursorAdded) {
-        return sanitized;
-    }
-    return `${sanitized}█`;
+    return DOMPurify.sanitize(parsed);
 };
 
 if (!process.server) {

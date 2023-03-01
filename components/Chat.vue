@@ -91,18 +91,21 @@ const sendMessage = async (input) => {
             ...opts,
             signal: processingController.value.signal,
             onopen(response) {
+                console.log('opened', response);
                 if (response.status === 200) {
                     return;
                 }
                 throw new Error(`Failed to send message. HTTP ${response.status} - ${response.statusText}`);
             },
             onclose() {
+                console.log('closed');
                 throw new Error(`Failed to send message. Server closed the connection unexpectedly.`);
             },
             onerror(err) {
                 throw err;
             },
             onmessage(message) {
+                console.log(message);
                 if (message.data === '[DONE]') {
                     processingController.value.abort();
                     return;
@@ -291,7 +294,7 @@ if (!process.server) {
 }
 
 .prose pre {
-    @apply m-0 my-2 p-0 whitespace-pre-wrap;
+    @apply whitespace-pre-wrap;
 }
 
 .prose pre code {

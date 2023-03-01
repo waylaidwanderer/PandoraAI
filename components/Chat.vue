@@ -165,6 +165,17 @@ const setChatContainerHeight = () => {
     scrollToBottom();
 };
 
+const parseMarkdown = (text) => {
+    // workaround for incomplete code, closing the block if it's not closed
+    // First, count occurrences of "```" in the text
+    const codeBlockCount = (text.match(/```/g) || []).length;
+    // If the count is odd and the text doesn't end with "```", add a closing block
+    if (codeBlockCount % 2 === 1 && !text.endsWith('```')) {
+        text += '\n```';
+    }
+    return marked.parse(text);
+};
+
 onMounted(() => {
     window.addEventListener('resize', setChatContainerHeight);
     setChatContainerHeight();
@@ -203,7 +214,7 @@ onUnmounted(() => {
                         <!-- message text -->
                         <div
                             class="prose prose-sm prose-invert prose-blockquote:border-l-white/50 max-w-6xl"
-                            v-html="(message.role === 'user' || message.raw) ? marked.parse(message.text) : marked.parse(`${message.text}█`)"
+                            v-html="(message.role === 'user' || message.raw) ? parseMarkdown(message.text) : parseMarkdown(`${message.text}█`)"
                         />
                     </div>
                 </div>

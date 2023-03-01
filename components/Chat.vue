@@ -135,9 +135,10 @@ const sendMessage = async (input) => {
                     return;
                 }
                 if (message.event === 'error') {
-                    const error = JSON.parse(message.data);
-                    botMessage.text = message.data.error || 'An error occurred. Please try again.';
-                    botMessage.raw = error;
+                    const data = JSON.parse(message.data);
+                    botMessage.text = data.error || 'An error occurred. Please try again.';
+                    botMessage.error = true;
+                    botMessage.raw = data;
                     nextTick().then(() => scrollToBottom());
                     return;
                 }

@@ -29,6 +29,7 @@ const processingController = ref(null);
 const conversationData = ref({});
 const messagesContainerElement = ref(null);
 const inputContainerElement = ref(null);
+const inputTextElement = ref(null);
 
 const scrollToBottom = () => {
     messagesContainerElement.value.scrollTop = messagesContainerElement.value.scrollHeight;
@@ -157,6 +158,8 @@ const sendMessage = async (input) => {
             processingController.value.abort();
         }
         processingController.value = null;
+        await nextTick();
+        inputTextElement.value.focus();
     }
 };
 
@@ -252,6 +255,7 @@ if (!process.server) {
                     </button>
                 </div>
                 <textarea
+                    ref="inputTextElement"
                     rows="1"
                     v-model="message"
                     @keydown.enter.exact.prevent="sendMessage(message)"

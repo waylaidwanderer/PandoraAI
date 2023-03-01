@@ -256,9 +256,10 @@ if (!process.server) {
                 <button
                     @click="sendMessage(message)"
                     :disabled="!!processingController"
-                    class="py-3 px-7 bg-white/10 backdrop-blur-sm text-slate-300 shadow rounded-sm ml-3 transition duration-300 ease-in-out hover:bg-white/20"
+                    class="py-3 px-7 bg-white/10 backdrop-blur-sm text-slate-300 shadow rounded-sm ml-3 transition duration-300 ease-in-out"
                     :class="{
-                        'opacity-50 cursor-not-allowed hover:bg-white/10': !!processingController,
+                        'opacity-50 cursor-not-allowed': !!processingController,
+                        'hover:bg-white/20': !processingController,
                     }"
                 >
                     Send

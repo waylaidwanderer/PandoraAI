@@ -265,11 +265,14 @@ if (!process.server) {
             class="w-full mx-auto max-w-4xl px-3 flex flex-row absolute left-0 right-0 h-[67px] z-10"
         >
             <div class="relative flex flex-row w-full justify-center">
-                <div class="flex gap-2 mb-3 items-stretch justify-center absolute bottom-full">
+                <div
+                    class="flex gap-2 mb-3 items-stretch justify-center absolute bottom-full"
+                    :class="{ 'w-full': !processingController }"
+                >
                     <button
                         v-if="processingController"
                         @click="stopProcessing"
-                        class="flex-1 py-2 px-3 bg-white/10 backdrop-blur-sm text-slate-300 text-sm shadow rounded transition duration-300 ease-in-out hover:bg-white/20"
+                        class="flex-1 py-2 px-5 bg-white/10 backdrop-blur-sm text-slate-300 text-sm shadow rounded transition duration-300 ease-in-out hover:bg-white/20"
                     >
                         Stop
                     </button>

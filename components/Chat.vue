@@ -180,13 +180,20 @@ const setChatContainerHeight = () => {
     scrollToBottom();
 };
 
-const parseMarkdown = (text) => {
+const parseMarkdown = (text, streaming = false) => {
+    text = text.trim();
+    let cursorAdded = false;
     // workaround for incomplete code, closing the block if it's not closed
     // First, count occurrences of "```" in the text
     const codeBlockCount = (text.match(/```/g) || []).length;
     // If the count is odd and the text doesn't end with "```", add a closing block
     if (codeBlockCount % 2 === 1 && !text.endsWith('```')) {
-        text += '\n```';
+        if (streaming) {
+            text += '█\n```';
+            cursorAdded = true;
+        } else {
+            text += '\n```';
+        }
     }
     // convert to markdown
     let parsed = marked.parse(text);
@@ -195,7 +202,12 @@ const parseMarkdown = (text) => {
     parsed = parsed.replace(/\[\^(\d+)\^]/g, '<strong>[$1]</strong>');
     // 2. replace "^1^" with "[1]" (after the progress stream is done)
     parsed = parsed.replace(/\^(\d+)\^/g, '<strong>[$1]</strong>');
-    return DOMPurify.sanitize(parsed);
+
+    const sanitized = DOMPurify.sanitize(parsed);
+    if (!streaming || cursorAdded) {
+        return sanitized;
+    }
+    return `${sanitized}█`;
 };
 
 if (!process.server) {
@@ -238,7 +250,7 @@ if (!process.server) {
                         <!-- message text -->
                         <div
                             class="prose prose-sm prose-invert prose-blockquote:border-l-white/50 max-w-6xl"
-                            v-html="(message.role === 'user' || message.raw) ? parseMarkdown(message.text) : parseMarkdown(`${message.text.trim()}█`)"
+                            v-html="(message.role === 'user' || message.raw) ? parseMarkdown(message.text) : parseMarkdown(message.text, true)"
                         />
                     </div>
                 </div>

@@ -149,6 +149,9 @@ const sendMessage = async (input) => {
     } catch (err) {
         console.log('ERROR', err);
     } finally {
+        if (!processingController.value.signal.aborted) {
+            processingController.value.abort();
+        }
         processingController.value = null;
     }
 };

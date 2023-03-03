@@ -3,6 +3,7 @@ import { fetchEventSource } from '@microsoft/fetch-event-source';
 import { marked } from 'marked';
 import DOMPurify from 'isomorphic-dompurify';
 import hljs from 'highlight.js';
+import { v4 as uuidv4 } from 'uuid';
 
 marked.setOptions({
     silent: true,
@@ -59,7 +60,7 @@ const sendMessage = async (input) => {
 
     message.value = '';
 
-    const messageId = crypto.randomUUID();
+    const messageId = uuidv4();
 
     messages.value.push({
         id: messageId,
@@ -68,7 +69,7 @@ const sendMessage = async (input) => {
     });
 
     messages.value.push({
-        id: crypto.randomUUID(),
+        id: uuidv4(),
         text: '',
         role: 'bot',
     });

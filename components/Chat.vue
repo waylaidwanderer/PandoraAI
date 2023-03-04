@@ -254,7 +254,7 @@ if (!process.server) {
                         </div>
                         <!-- message text -->
                         <div
-                            class="prose prose-sm prose-invert prose-blockquote:border-l-white/50 break-words max-w-6xl"
+                            class="prose prose-sm prose-chatgpt break-words max-w-6xl"
                             v-html="(message.role === 'user' || message.raw) ? parseMarkdown(message.text) : parseMarkdown(message.text, true)"
                         />
                     </div>

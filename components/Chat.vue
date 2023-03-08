@@ -4,6 +4,8 @@ import { marked } from 'marked';
 import DOMPurify from 'isomorphic-dompurify';
 import hljs from 'highlight.js';
 import { v4 as uuidv4 } from 'uuid';
+import BingIcon from '~/components/Icons/BingIcon.vue';
+import GPTIcon from '~/components/Icons/GPTIcon.vue';
 
 marked.setOptions({
     silent: true,
@@ -23,6 +25,7 @@ marked.setOptions({
 
 const config = useRuntimeConfig();
 
+const clientToUse = ref('chatgpt');
 const messages = ref([]);
 const message = ref('');
 const processingController = ref(null);
@@ -32,6 +35,12 @@ const conversationData = ref({});
 const messagesContainerElement = ref(null);
 const inputContainerElement = ref(null);
 const inputTextElement = ref(null);
+
+// compute number of rows for textarea based on message newlines, up to 7
+const inputRows = computed(() => {
+    const newlines = (message.value.match(/\n/g) || []).length;
+    return Math.min(newlines + 1, 7);
+});
 
 const scrollToBottom = () => {
     messagesContainerElement.value.scrollTop = messagesContainerElement.value.scrollHeight;
@@ -263,9 +272,9 @@ if (!process.server) {
         </div>
         <div
             ref="inputContainerElement"
-            class="w-full mx-auto max-w-4xl px-3 lg:px-0 flex flex-row absolute left-0 right-0 h-[67px] z-10"
+            class="w-full mx-auto max-w-4xl px-3 lg:px-0 flex flex-row absolute left-0 right-0 z-10"
         >
-            <div class="relative flex flex-row w-full justify-center">
+            <div class="relative flex flex-row w-full justify-center items-center">
                 <div
                     class="flex gap-2 mb-3 items-stretch justify-center absolute bottom-full"
                     :class="{ 'w-full': !processingController }"
@@ -286,14 +295,28 @@ if (!process.server) {
                         {{ response }}
                     </button>
                 </div>
+                <div class="flex items-center w-10 h-10 my-auto ml-2 justify-center absolute left-0 top-0 bottom-0 z-10">
+                    <GPTIcon
+                        v-if="clientToUse === 'chatgpt'"
+                        class="w-15 h-15 p-2 block shadow cursor-pointer transition duration-300 ease-in-out hover:bg-black/30 rounded-lg"
+                    />
+                    <GPTIcon
+                        v-else-if="clientToUse === 'chatgpt-browser'"
+                        class="w-15 h-15 p-2 text-[#6ea194] block shadow cursor-pointer transition duration-300 ease-in-out hover:bg-black/30 rounded-lg"
+                    />
+                    <BingIcon
+                        v-else-if="clientToUse === 'bing'"
+                        class="w-15 h-15 p-1 block shadow cursor-pointer transition duration-300 ease-in-out hover:bg-black/30 rounded-lg"
+                    />
+                </div>
                 <textarea
                     ref="inputTextElement"
-                    rows="1"
+                    :rows="inputRows"
                     v-model="message"
                     @keydown.enter.exact.prevent="sendMessage(message)"
                     placeholder="Type your message here..."
                     :disabled="!!processingController"
-                    class="p-3 rounded-sm text-slate-100 w-full bg-white/5 backdrop-blur-sm placeholder-white/40 shadow-inner shadow focus:outline-none"
+                    class="py-4 pl-14 rounded-sm text-slate-100 w-full bg-white/5 backdrop-blur-sm placeholder-white/40 shadow-inner shadow focus:outline-none"
                     :class="{
                         'opacity-50 cursor-not-allowed': !!processingController,
                     }"

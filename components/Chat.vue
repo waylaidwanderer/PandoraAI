@@ -42,6 +42,13 @@ const inputRows = computed(() => {
     return Math.min(newlines + 1, 7);
 });
 
+// watch inputRows for change and call `setChatContainerHeight` to adjust height
+watch(inputRows, () => {
+    nextTick(() => {
+        setChatContainerHeight();
+    });
+});
+
 const scrollToBottom = () => {
     messagesContainerElement.value.scrollTop = messagesContainerElement.value.scrollHeight;
 };
@@ -241,7 +248,7 @@ if (!process.server) {
     <div class="flex flex-col flex-grow items-center">
         <div
             ref="messagesContainerElement"
-            class="overflow-y-auto w-full rounded-sm pb-12"
+            class="overflow-y-auto w-full rounded-sm pb-12 px-3"
         >
             <TransitionGroup name="messages">
                 <div
@@ -272,7 +279,7 @@ if (!process.server) {
         </div>
         <div
             ref="inputContainerElement"
-            class="w-full mx-auto max-w-4xl px-3 lg:px-0 flex flex-row absolute left-0 right-0 z-10"
+            class="w-full mx-auto max-w-4xl px-3 md:px-0 flex flex-row absolute left-0 right-0 z-10"
         >
             <div class="relative flex flex-row w-full justify-center items-stretch rounded shadow">
                 <div

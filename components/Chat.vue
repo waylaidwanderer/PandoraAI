@@ -274,7 +274,7 @@ if (!process.server) {
             ref="inputContainerElement"
             class="w-full mx-auto max-w-4xl px-3 lg:px-0 flex flex-row absolute left-0 right-0 z-10"
         >
-            <div class="relative flex flex-row w-full justify-center items-stretch">
+            <div class="relative flex flex-row w-full justify-center items-stretch rounded shadow">
                 <div
                     class="flex gap-2 mb-3 items-stretch justify-center absolute bottom-full"
                     :class="{ 'w-full': !processingController }"
@@ -298,15 +298,27 @@ if (!process.server) {
                 <div class="flex items-center w-10 h-10 my-auto ml-2 justify-center absolute left-0 top-0 bottom-0 z-10">
                     <GPTIcon
                         v-if="clientToUse === 'chatgpt'"
-                        class="w-15 h-15 p-2 block shadow cursor-pointer transition duration-300 ease-in-out hover:bg-black/30 rounded-lg"
+                        class="w-15 h-15 p-2 block shadow transition duration-300 ease-in-out rounded-lg"
+                        :class="{
+                            'opacity-50 cursor-not-allowed': !!processingController,
+                            'hover:bg-black/30 cursor-pointer': !processingController,
+                        }"
                     />
                     <GPTIcon
                         v-else-if="clientToUse === 'chatgpt-browser'"
-                        class="w-15 h-15 p-2 text-[#6ea194] block shadow cursor-pointer transition duration-300 ease-in-out hover:bg-black/30 rounded-lg"
+                        class="w-15 h-15 p-2 text-[#6ea194] block shadow transition duration-300 ease-in-out rounded-lg"
+                        :class="{
+                            'opacity-50 cursor-not-allowed': !!processingController,
+                            'hover:bg-black/30 cursor-pointer': !processingController,
+                        }"
                     />
                     <BingIcon
                         v-else-if="clientToUse === 'bing'"
-                        class="w-15 h-15 p-1 block shadow cursor-pointer transition duration-300 ease-in-out hover:bg-black/30 rounded-lg"
+                        class="w-15 h-15 p-1 block shadow transition duration-300 ease-in-out rounded-lg"
+                        :class="{
+                            'opacity-50 cursor-not-allowed': !!processingController,
+                            'hover:bg-black/30 cursor-pointer': !processingController,
+                        }"
                     />
                 </div>
                 <textarea
@@ -316,7 +328,7 @@ if (!process.server) {
                     @keydown.enter.exact.prevent="sendMessage(message)"
                     placeholder="Type your message here..."
                     :disabled="!!processingController"
-                    class="py-4 pl-14 pr-14 rounded-sm text-slate-100 w-full bg-white/5 backdrop-blur-sm placeholder-white/40 shadow-inner shadow focus:outline-none"
+                    class="py-4 pl-14 pr-14 rounded-l-sm text-slate-100 w-full bg-white/5 backdrop-blur-sm placeholder-white/40 focus:outline-none resize-none"
                     :class="{
                         'opacity-50 cursor-not-allowed': !!processingController,
                     }"
@@ -326,7 +338,7 @@ if (!process.server) {
                     :disabled="!!processingController"
                     class="
                         flex items-center flex-1
-                        px-4 text-slate-300 shadow rounded-sm
+                        px-4 text-slate-300 rounded-r-sm bg-white/5 backdrop-blur-sm
                         transition duration-300 ease-in-out
                     "
                     :class="{

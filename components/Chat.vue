@@ -26,6 +26,7 @@ marked.setOptions({
 const config = useRuntimeConfig();
 
 const clientToUse = ref('chatgpt');
+const clientDropdownOpen = ref(false);
 const messages = ref([]);
 const message = ref('');
 const processingController = ref(null);
@@ -231,7 +232,22 @@ const parseMarkdown = (text, streaming = false) => {
     return DOMPurify.sanitize(parsed);
 };
 
+const setClientToUse = (client) => {
+    if (client === clientToUse.value) {
+        return;
+    }
+    clientToUse.value = client;
+    localStorage.setItem('clientToUse', client);
+};
+
 if (!process.server) {
+    onBeforeMount(() => {
+        const client = localStorage.getItem('clientToUse');
+        if (client) {
+            setClientToUse(client);
+        }
+    });
+
     onMounted(() => {
         window.addEventListener('resize', setChatContainerHeight);
         setChatContainerHeight();
@@ -302,34 +318,86 @@ if (!process.server) {
                         {{ response }}
                     </button>
                 </div>
+                <Transition name="slide-from-bottom">
+                    <div
+                        v-if="clientDropdownOpen"
+                        class="flex flex-col items-stretch absolute bottom-full bg-white/10 backdrop-blur-sm rounded-t w-full overflow-hidden"
+                    >
+                        <div class="w-full flex flex-row">
+                            <button
+                                class="px-3 py-1 flex-1 flex flex-row items-center transition ease-in-out hover:bg-white/20 text-sm"
+                                :class="{ 'font-bold': clientToUse === 'chatgpt' }"
+                                @click="setClientToUse('chatgpt')"
+                            >
+                                <GPTIcon class="h-9 py-2 pr-2 shadow rounded-lg" />
+                                OpenAI API
+                            </button>
+                            <button class="hover:bg-white/20 px-3 py-1 flex items-center transition ease-in-out">
+                                <Icon class="w-5 h-5 text-white/70" name="bx:bxs-cog" />
+                            </button>
+                        </div>
+                        <div class="w-full flex flex-row">
+                            <button
+                                class="w-full px-3 py-1 flex flex-row items-center transition ease-in-out hover:bg-white/20 border-t border-b border-white/5 text-sm"
+                                :class="{ 'font-bold': clientToUse === 'chatgpt-browser' }"
+                                @click="setClientToUse('chatgpt-browser')"
+                            >
+                                <GPTIcon class="h-9 py-2 pr-2 text-[#6ea194] shadow rounded-lg" />
+                                ChatGPT
+                            </button>
+                            <button class="hover:bg-white/20 px-3 py-1 flex items-center transition ease-in-out">
+                                <Icon class="w-5 h-5 text-white/70" name="bx:bxs-cog" />
+                            </button>
+                        </div>
+                        <div class="w-full flex flex-row">
+                            <button
+                                class="w-full px-3 py-1 flex flex-row items-center transition ease-in-out hover:bg-white/20 text-sm"
+                                :class="{ 'font-bold': clientToUse === 'bing' }"
+                                @click="setClientToUse('bing')"
+                            >
+                                <BingIcon class="h-9 py-2 pr-2 shadow rounded-lg" />
+                                Bing
+                            </button>
+                            <button
+                                class="hover:bg-white/20 px-3 py-1 flex items-center transition ease-in-out"
+                            >
+                                <Icon class="w-5 h-5 text-white/70" name="bx:bxs-cog" />
+                            </button>
+                        </div>
+                    </div>
+                </Transition>
                 <button
+                    @click="clientDropdownOpen = !clientDropdownOpen"
+                    @blur.native="clientDropdownOpen = false"
                     class="flex items-center w-10 h-10 my-auto ml-2 justify-center absolute left-0 top-0 bottom-0 z-10"
                     :disabled="!!processingController"
                 >
-                    <GPTIcon
-                        v-if="clientToUse === 'chatgpt'"
-                        class="w-15 h-15 p-2 block shadow transition duration-300 ease-in-out rounded-lg"
-                        :class="{
-                            'opacity-50 cursor-not-allowed': !!processingController,
-                            'hover:bg-black/30 cursor-pointer': !processingController,
-                        }"
-                    />
-                    <GPTIcon
-                        v-else-if="clientToUse === 'chatgpt-browser'"
-                        class="w-15 h-15 p-2 text-[#6ea194] block shadow transition duration-300 ease-in-out rounded-lg"
-                        :class="{
-                            'opacity-50 cursor-not-allowed': !!processingController,
-                            'hover:bg-black/30 cursor-pointer': !processingController,
-                        }"
-                    />
-                    <BingIcon
-                        v-else-if="clientToUse === 'bing'"
-                        class="w-15 h-15 p-1 block shadow transition duration-300 ease-in-out rounded-lg"
-                        :class="{
-                            'opacity-50 cursor-not-allowed': !!processingController,
-                            'hover:bg-black/30 cursor-pointer': !processingController,
-                        }"
-                    />
+                    <Transition name="fade" mode="out-in">
+                        <GPTIcon
+                            v-if="clientToUse === 'chatgpt'"
+                            class="w-10 h-10 p-2 block shadow transition duration-300 ease-in-out rounded-lg"
+                            :class="{
+                                'opacity-50 cursor-not-allowed': !!processingController,
+                                'hover:bg-black/30 cursor-pointer': !processingController,
+                            }"
+                        />
+                        <GPTIcon
+                            v-else-if="clientToUse === 'chatgpt-browser'"
+                            class="w-10 h-10 p-2 text-[#6ea194] block shadow transition duration-300 ease-in-out rounded-lg"
+                            :class="{
+                                'opacity-50 cursor-not-allowed': !!processingController,
+                                'hover:bg-black/30 cursor-pointer': !processingController,
+                            }"
+                        />
+                        <BingIcon
+                            v-else-if="clientToUse === 'bing'"
+                            class="w-10 h-10 p-2 block shadow transition duration-300 ease-in-out rounded-lg"
+                            :class="{
+                                'opacity-50 cursor-not-allowed': !!processingController,
+                                'hover:bg-black/30 cursor-pointer': !processingController,
+                            }"
+                        />
+                    </Transition>
                 </button>
                 <textarea
                     ref="inputTextElement"
@@ -368,16 +436,33 @@ if (!process.server) {
 .messages-enter-active {
     transition: all 0.3s ease;
 }
-
 .messages-enter-from {
     opacity: 0;
     transform: translateY(0);
 }
-
 /* ensure leaving items are taken out of layout flow so that moving
    animations can be calculated correctly. */
 .messages-leave-active {
     position: absolute;
+    opacity: 0;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.15s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0.5;
+}
+
+.slide-from-bottom-enter-active,
+.slide-from-bottom-leave-active{
+    transition: all 0.3s ease;
+}
+.slide-from-bottom-enter-from,
+.slide-from-bottom-leave-to {
+    transform: translateY(30px);
     opacity: 0;
 }
 

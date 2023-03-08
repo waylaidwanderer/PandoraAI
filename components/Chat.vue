@@ -274,7 +274,7 @@ if (!process.server) {
             ref="inputContainerElement"
             class="w-full mx-auto max-w-4xl px-3 lg:px-0 flex flex-row absolute left-0 right-0 z-10"
         >
-            <div class="relative flex flex-row w-full justify-center items-center">
+            <div class="relative flex flex-row w-full justify-center items-stretch">
                 <div
                     class="flex gap-2 mb-3 items-stretch justify-center absolute bottom-full"
                     :class="{ 'w-full': !processingController }"
@@ -316,7 +316,7 @@ if (!process.server) {
                     @keydown.enter.exact.prevent="sendMessage(message)"
                     placeholder="Type your message here..."
                     :disabled="!!processingController"
-                    class="py-4 pl-14 rounded-sm text-slate-100 w-full bg-white/5 backdrop-blur-sm placeholder-white/40 shadow-inner shadow focus:outline-none"
+                    class="py-4 pl-14 pr-14 rounded-sm text-slate-100 w-full bg-white/5 backdrop-blur-sm placeholder-white/40 shadow-inner shadow focus:outline-none"
                     :class="{
                         'opacity-50 cursor-not-allowed': !!processingController,
                     }"
@@ -324,13 +324,17 @@ if (!process.server) {
                 <button
                     @click="sendMessage(message)"
                     :disabled="!!processingController"
-                    class="py-3 px-7 bg-white/10 backdrop-blur-sm text-slate-300 shadow rounded-sm ml-3 transition duration-300 ease-in-out"
+                    class="
+                        flex items-center flex-1
+                        px-4 text-slate-300 shadow rounded-sm
+                        transition duration-300 ease-in-out
+                    "
                     :class="{
                         'opacity-50 cursor-not-allowed': !!processingController,
-                        'hover:bg-white/20': !processingController,
+                        'hover:bg-white/10 hover:backdrop-blur-sm': !processingController,
                     }"
                 >
-                    Send
+                    <Icon class="w-5 h-5" name="bx:bxs-send" />
                 </button>
             </div>
         </div>

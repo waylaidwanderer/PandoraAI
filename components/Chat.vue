@@ -248,7 +248,7 @@ if (!process.server) {
     <div class="flex flex-col flex-grow items-center">
         <div
             ref="messagesContainerElement"
-            class="overflow-y-auto w-full rounded-sm pb-12 px-3"
+            class="overflow-y-auto w-full rounded-sm pb-12 px-3 lg:px-0"
         >
             <TransitionGroup name="messages">
                 <div
@@ -279,7 +279,7 @@ if (!process.server) {
         </div>
         <div
             ref="inputContainerElement"
-            class="w-full mx-auto max-w-4xl px-3 md:px-0 flex flex-row absolute left-0 right-0 z-10"
+            class="mx-auto w-full max-w-4xl px-3 lg:px-0 flex flex-row absolute left-0 right-0 mb-7 sm:mb-0 z-10"
         >
             <div class="relative flex flex-row w-full justify-center items-stretch rounded shadow">
                 <div
@@ -302,7 +302,10 @@ if (!process.server) {
                         {{ response }}
                     </button>
                 </div>
-                <div class="flex items-center w-10 h-10 my-auto ml-2 justify-center absolute left-0 top-0 bottom-0 z-10">
+                <button
+                    class="flex items-center w-10 h-10 my-auto ml-2 justify-center absolute left-0 top-0 bottom-0 z-10"
+                    :disabled="!!processingController"
+                >
                     <GPTIcon
                         v-if="clientToUse === 'chatgpt'"
                         class="w-15 h-15 p-2 block shadow transition duration-300 ease-in-out rounded-lg"
@@ -327,7 +330,7 @@ if (!process.server) {
                             'hover:bg-black/30 cursor-pointer': !processingController,
                         }"
                     />
-                </div>
+                </button>
                 <textarea
                     ref="inputTextElement"
                     :rows="inputRows"
@@ -335,7 +338,7 @@ if (!process.server) {
                     @keydown.enter.exact.prevent="sendMessage(message)"
                     placeholder="Type your message here..."
                     :disabled="!!processingController"
-                    class="py-4 pl-14 pr-14 rounded-l-sm text-slate-100 w-full bg-white/5 backdrop-blur-sm placeholder-white/40 focus:outline-none resize-none"
+                    class="py-4 pl-14 pr-14 rounded-l-sm text-slate-100 w-full bg-white/5 backdrop-blur-sm placeholder-white/40 focus:outline-none resize-none placeholder:truncate"
                     :class="{
                         'opacity-50 cursor-not-allowed': !!processingController,
                     }"

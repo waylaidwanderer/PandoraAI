@@ -6,6 +6,7 @@ import hljs from 'highlight.js';
 import { v4 as uuidv4 } from 'uuid';
 import BingIcon from '~/components/Icons/BingIcon.vue';
 import GPTIcon from '~/components/Icons/GPTIcon.vue';
+import ClientDropdown from '~/components/Chat/ClientDropdown.vue';
 
 marked.setOptions({
     silent: true,
@@ -319,52 +320,11 @@ if (!process.server) {
                     </button>
                 </div>
                 <Transition name="slide-from-bottom">
-                    <div
+                    <ClientDropdown
                         v-if="clientDropdownOpen"
-                        class="flex flex-col items-stretch absolute bottom-full bg-white/10 backdrop-blur-sm rounded-t w-full overflow-hidden"
-                    >
-                        <div class="w-full flex flex-row">
-                            <button
-                                class="px-3 py-1 flex-1 flex flex-row items-center transition ease-in-out hover:bg-white/20 text-sm"
-                                :class="{ 'font-bold': clientToUse === 'chatgpt' }"
-                                @click="setClientToUse('chatgpt')"
-                            >
-                                <GPTIcon class="h-9 py-2 pr-2 shadow rounded-lg" />
-                                OpenAI API
-                            </button>
-                            <button class="hover:bg-white/20 px-3 py-1 flex items-center transition ease-in-out">
-                                <Icon class="w-5 h-5 text-white/70" name="bx:bxs-cog" />
-                            </button>
-                        </div>
-                        <div class="w-full flex flex-row">
-                            <button
-                                class="w-full px-3 py-1 flex flex-row items-center transition ease-in-out hover:bg-white/20 border-t border-b border-white/5 text-sm"
-                                :class="{ 'font-bold': clientToUse === 'chatgpt-browser' }"
-                                @click="setClientToUse('chatgpt-browser')"
-                            >
-                                <GPTIcon class="h-9 py-2 pr-2 text-[#6ea194] shadow rounded-lg" />
-                                ChatGPT
-                            </button>
-                            <button class="hover:bg-white/20 px-3 py-1 flex items-center transition ease-in-out">
-                                <Icon class="w-5 h-5 text-white/70" name="bx:bxs-cog" />
-                            </button>
-                        </div>
-                        <div class="w-full flex flex-row">
-                            <button
-                                class="w-full px-3 py-1 flex flex-row items-center transition ease-in-out hover:bg-white/20 text-sm"
-                                :class="{ 'font-bold': clientToUse === 'bing' }"
-                                @click="setClientToUse('bing')"
-                            >
-                                <BingIcon class="h-9 py-2 pr-2 shadow rounded-lg" />
-                                Bing
-                            </button>
-                            <button
-                                class="hover:bg-white/20 px-3 py-1 flex items-center transition ease-in-out"
-                            >
-                                <Icon class="w-5 h-5 text-white/70" name="bx:bxs-cog" />
-                            </button>
-                        </div>
-                    </div>
+                        :set-client-to-use="setClientToUse"
+                        :client-to-use="clientToUse"
+                    />
                 </Transition>
                 <button
                     @click="clientDropdownOpen = !clientDropdownOpen"

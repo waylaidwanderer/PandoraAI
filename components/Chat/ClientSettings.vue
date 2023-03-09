@@ -321,7 +321,7 @@ watch(() => props.client, (client) => {
                                             class="flex items-center px-3 group"
                                             @click="resetSaveAsName"
                                         >
-                                            <Icon name="bx:bx-reset" class="text-slate-300 group-hover:text-slate-100 transition" />
+                                            <Icon name="bx:bx-reset" class="text-white/70 group-hover:text-white/90 transition" />
                                         </button>
                                     </div>
                                     <button

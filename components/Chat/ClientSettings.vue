@@ -110,6 +110,25 @@ const availableOptions = {
 
 const formClientOptions = ref({});
 
+// computed default saveAsName based on client, using switch
+const defaultSaveAsName = computed(() => {
+    if (!props.client) {
+        return '';
+    }
+    switch (props.client) {
+        case 'chatgpt':
+            return 'OpenAI API';
+        case 'chatgpt-browser':
+            return 'ChatGPT';
+        case 'bing':
+            return 'Bing';
+        default:
+            throw new Error('Invalid client');
+    }
+});
+
+const saveAsName = ref('');
+
 // Recursive form generation component
 const generateForm = (options, parentKey, levels = 0) => {
     return Object.entries(options).map(([key, value]) => {
@@ -167,10 +186,22 @@ const generateForm = (options, parentKey, levels = 0) => {
     });
 };
 
+const resetSaveAsName = () => {
+    saveAsName.value = defaultSaveAsName.value;
+};
+
 const save = () => {
     console.log(formClientOptions);
     // TODO: Save to localStorage
+    // TODO: if preset name is not default, set as active
 };
+
+// watch isOpen prop
+watch(() => props.isOpen, (isOpen) => {
+    if (isOpen) {
+        resetSaveAsName();
+    }
+});
 </script>
 
 <template>
@@ -214,14 +245,32 @@ const save = () => {
                                     </template>
                                 </div>
 
-                                <div class="flex justify-end mt-4">
+                                <div class="flex justify-end mt-4 gap-2">
+                                    <!-- Save as Name input -->
+                                    <div class="relative flex items-stretch shadow-inner bg-white/5 rounded">
+                                        <label class="text-white/60 text-xs h-full flex items-center px-3 border-r border-white/5">
+                                            Preset Name
+                                        </label>
+                                        <input
+                                            type="text"
+                                            class="placeholder-white/40 bg-transparent text-slate-300 text-sm py-2 focus:outline-none pl-3"
+                                            placeholder="Preset Name"
+                                            v-model="saveAsName"
+                                        />
+                                        <button
+                                            class="flex items-center px-3 group"
+                                            @click="resetSaveAsName"
+                                        >
+                                            <Icon name="bx:bx-reset" class="text-slate-300 group-hover:text-slate-100 transition" />
+                                        </button>
+                                    </div>
                                     <button
                                         type="button"
                                         class="
                                             flex items-center
-                                            px-4 py-2 text-slate-300 rounded bg-white/10 backdrop-blur-sm
+                                            px-4 py-2 text-slate-300 rounded bg-white/10
                                             transition duration-300 ease-in-out
-                                            hover:bg-white/10 hover:backdrop-blur-sm
+                                            hover:bg-white/20
                                         "
                                         @click="save"
                                     >

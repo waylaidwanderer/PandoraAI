@@ -7,8 +7,9 @@ import {
 } from '@headlessui/vue';
 import GPTIcon from '~/components/Icons/GPTIcon.vue';
 import BingIcon from '~/components/Icons/BingIcon.vue';
-import set from 'lodash/set';
 import get from 'lodash/get';
+import set from 'lodash/set';
+import unset from 'lodash/unset';
 
 const props = defineProps({
     isOpen: {
@@ -144,8 +145,8 @@ const generateForm = (options, parentKey, levels = 0) => {
                 h('label', { class: 'text-white/80 font-bold' }, option.label),
                 ...generateForm(option.properties, optionKey, levels + 1),
             ]);
-        } else { // other types like text, number, checkbox etc.
-            // TODO: checkbox styling, range slider, textarea
+        } else { // other types like text, range, checkbox etc.
+            // TODO: checkbox styling
             let classList = 'w-full placeholder-white/40 text-slate-300 text-sm rounded py-2 focus:outline-none';
             switch (option.type) {
                 case 'range':
@@ -156,6 +157,56 @@ const generateForm = (options, parentKey, levels = 0) => {
                     break;
             }
             const inputValue = get(formClientOptions.value, optionKey);
+            let inputElement;
+            switch (option.type) {
+                case 'textarea':
+                    inputElement = h('textarea', {
+                        placeholder: 'default server value',
+                        value: inputValue,
+                        onInput: (e) => {
+                            const inputValue = e.target.value.trim();
+                            if (!inputValue) {
+                                unset(formClientOptions.value, optionKey);
+                            } else {
+                                set(formClientOptions.value, optionKey, inputValue);
+                            }
+                        },
+                        class: classList,
+                    });
+                    break;
+                default:
+                    inputElement = h('input', {
+                        type: option.type,
+                        placeholder: 'default server value',
+                        value: inputValue,
+                        min: option.range ? option.range[0] : null,
+                        max: option.range ? option.range[1] : null,
+                        step: option.step || null,
+                        onInput: (e) => {
+                            let inputValue = e.target.value;
+                            if (typeof inputValue === 'undefined') {
+                                unset(formClientOptions.value, optionKey);
+                                return;
+                            }
+                            if (typeof inputValue === 'string') {
+                                inputValue = inputValue.trim();
+                            }
+                            if (option.type === 'text' && !inputValue) {
+                                unset(formClientOptions.value, optionKey);
+                                return;
+                            }
+                            if (option.type === 'number' || option.type === 'range') {
+                                inputValue = Number(inputValue);
+                            } else if (option.type === 'checkbox') {
+                                inputValue = e.target.checked;
+                            }
+                            set(formClientOptions.value, optionKey, inputValue);
+                        },
+                        class: classList,
+                    });
+                    break;
+            }
+
             return h('div', {
                 class: 'flex flex-col gap-2',
             }, [
@@ -163,24 +214,7 @@ const generateForm = (options, parentKey, levels = 0) => {
                     { class: 'text-white/60 text-xs' },
                     option.type === 'range' ? `${option.label}: ${typeof inputValue === 'undefined' ? 'default server value' : inputValue}` : option.label,
                 ),
-                h('input', {
-                    type: option.type,
-                    placeholder: 'default server value',
-                    value: inputValue,
-                    min: option.range ? option.range[0] : null,
-                    max: option.range ? option.range[1] : null,
-                    step: option.step || null,
-                    onInput: (e) => {
-                        let inputValue = e.target.value;
-                        if (option.type === 'number' || option.type === 'range') {
-                            inputValue = Number(inputValue);
-                        } else if (option.type === 'checkbox') {
-                            inputValue = e.target.checked;
-                        }
-                        return set(formClientOptions.value, optionKey, inputValue);
-                    },
-                    class: classList,
-                })
+                inputElement,
             ]);
         }
     });
@@ -191,7 +225,7 @@ const resetSaveAsName = () => {
 };
 
 const save = () => {
-    console.log(formClientOptions);
+    console.log(formClientOptions.value);
     // TODO: Save to localStorage
     // TODO: if preset name is not default, set as active
 };

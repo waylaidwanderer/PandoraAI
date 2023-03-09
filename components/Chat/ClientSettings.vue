@@ -183,7 +183,6 @@ const generateForm = (options, parentKey, levels = 0) => {
                     inputElement = h(Switch, {
                         modelValue: inputValue || false,
                         'onUpdate:modelValue': (checked) => {
-                            console.log(checked);
                             set(formClientOptions.value, optionKey, checked);
                         },
                         class: `relative inline-flex h-6 w-11 items-center rounded-full transition ${inputValue ? 'bg-white/50' : 'bg-white/10'}`,
@@ -327,14 +326,14 @@ watch(() => props.client, (client) => {
                                     <button
                                         type="button"
                                         class="
-                                            flex items-center
-                                            px-4 py-2 text-slate-300 rounded bg-white/10
+                                            flex items-center gap-1
+                                            text-slate-300 rounded bg-white/10
                                             transition duration-300 ease-in-out
                                             hover:bg-white/20
                                         "
                                         @click="save"
                                     >
-                                        Save
+                                        <Icon name="bx:bx-save" class="relative text-lg top-[1px] ml-4" /> <span class="mr-4">Save</span>
                                     </button>
                                 </div>
                             </DialogDescription>

@@ -11,9 +11,11 @@ defineProps({
         type: Function,
         required: true,
     },
+    setIsClientSettingsModalOpen: {
+        type: Function,
+        required: true,
+    },
 });
-
-
 </script>
 
 <template>
@@ -29,7 +31,10 @@ defineProps({
                 <GPTIcon class="h-9 py-2 pr-2 shadow rounded-lg" />
                 OpenAI API
             </button>
-            <button class="hover:bg-white/20 px-3 py-1 flex items-center transition ease-in-out">
+            <button
+                class="hover:bg-white/20 px-3 py-1 flex items-center transition ease-in-out"
+                @click="setIsClientSettingsModalOpen(true, 'chatgpt')"
+            >
                 <Icon class="w-5 h-5 text-white/70" name="bx:bxs-cog" />
             </button>
         </div>
@@ -42,7 +47,10 @@ defineProps({
                 <GPTIcon class="h-9 py-2 pr-2 text-[#6ea194] shadow rounded-lg" />
                 ChatGPT
             </button>
-            <button class="hover:bg-white/20 px-3 py-1 flex items-center transition ease-in-out">
+            <button
+                class="hover:bg-white/20 px-3 py-1 flex items-center transition ease-in-out"
+                @click="setIsClientSettingsModalOpen(true, 'chatgpt-browser')"
+            >
                 <Icon class="w-5 h-5 text-white/70" name="bx:bxs-cog" />
             </button>
         </div>
@@ -57,6 +65,7 @@ defineProps({
             </button>
             <button
                 class="hover:bg-white/20 px-3 py-1 flex items-center transition ease-in-out"
+                @click="setIsClientSettingsModalOpen(true, 'bing')"
             >
                 <Icon class="w-5 h-5 text-white/70" name="bx:bxs-cog" />
             </button>

@@ -7,6 +7,7 @@ import { v4 as uuidv4 } from 'uuid';
 import BingIcon from '~/components/Icons/BingIcon.vue';
 import GPTIcon from '~/components/Icons/GPTIcon.vue';
 import ClientDropdown from '~/components/Chat/ClientDropdown.vue';
+import ClientSettings from '~/components/Chat/ClientSettings.vue';
 
 marked.setOptions({
     silent: true,
@@ -27,7 +28,10 @@ marked.setOptions({
 const config = useRuntimeConfig();
 
 const clientToUse = ref('chatgpt');
-const clientDropdownOpen = ref(false);
+const isClientDropdownOpen = ref(false);
+const isClientSettingsModalOpen = ref(false);
+const clientSettingsModalClient = ref(null);
+
 const messages = ref([]);
 const message = ref('');
 const processingController = ref(null);
@@ -241,6 +245,11 @@ const setClientToUse = (client) => {
     localStorage.setItem('clientToUse', client);
 };
 
+const setIsClientSettingsModalOpen = (isOpen, client = null) => {
+    isClientSettingsModalOpen.value = isOpen;
+    clientSettingsModalClient.value = client;
+};
+
 if (!process.server) {
     onBeforeMount(() => {
         const client = localStorage.getItem('clientToUse');
@@ -262,6 +271,13 @@ if (!process.server) {
 </script>
 
 <template>
+    <client-only>
+        <ClientSettings
+            :is-open="isClientSettingsModalOpen"
+            :set-is-open="setIsClientSettingsModalOpen"
+            :client="clientSettingsModalClient"
+        />
+    </client-only>
     <div class="flex flex-col flex-grow items-center">
         <div
             ref="messagesContainerElement"
@@ -321,14 +337,15 @@ if (!process.server) {
                 </div>
                 <Transition name="slide-from-bottom">
                     <ClientDropdown
-                        v-if="clientDropdownOpen"
+                        v-if="isClientDropdownOpen"
                         :set-client-to-use="setClientToUse"
                         :client-to-use="clientToUse"
+                        :set-is-client-settings-modal-open="setIsClientSettingsModalOpen"
                     />
                 </Transition>
                 <button
-                    @click="clientDropdownOpen = !clientDropdownOpen"
-                    @blur.native="clientDropdownOpen = false"
+                    @click="isClientDropdownOpen = !isClientDropdownOpen"
+                    @blur.native="isClientDropdownOpen = false"
                     class="flex items-center w-10 h-10 my-auto ml-2 justify-center absolute left-0 top-0 bottom-0 z-10"
                     :disabled="!!processingController"
                 >
@@ -409,11 +426,11 @@ if (!process.server) {
 
 .fade-enter-active,
 .fade-leave-active {
-    transition: opacity 0.15s ease;
+    transition: opacity 0.15s ease-in-out;
 }
 .fade-enter-from,
 .fade-leave-to {
-    opacity: 0.5;
+    opacity: 0;
 }
 
 .slide-from-bottom-enter-active,

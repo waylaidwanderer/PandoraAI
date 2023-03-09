@@ -4,6 +4,7 @@ import {
     DialogTitle,
     DialogDescription,
     DialogPanel,
+    Switch,
 } from '@headlessui/vue';
 import GPTIcon from '~/components/Icons/GPTIcon.vue';
 import BingIcon from '~/components/Icons/BingIcon.vue';
@@ -100,8 +101,12 @@ const availableOptions = {
             type: 'nested',
             label: 'Client Options',
             properties: {
-                cookies: {
+                host: {
                     type: 'text',
+                    label: 'Host (e.g. https://cn.bing.com)',
+                },
+                cookies: {
+                    type: 'textarea',
                     label: 'Cookies',
                 },
             },
@@ -174,6 +179,21 @@ const generateForm = (options, parentKey, levels = 0) => {
                         class: classList,
                     });
                     break;
+                case 'checkbox':
+                    inputElement = h(Switch, {
+                        modelValue: inputValue || false,
+                        'onUpdate:modelValue': (checked) => {
+                            console.log(checked);
+                            set(formClientOptions.value, optionKey, checked);
+                        },
+                        class: `relative inline-flex h-6 w-11 items-center rounded-full transition ${inputValue ? 'bg-white/50' : 'bg-white/10'}`,
+                    }, () => [
+                        h('span', { class: 'sr-only' }, option.label),
+                        h('span', {
+                            class: `inline-block h-4 w-4 transform rounded-full bg-white transition ${inputValue ? 'translate-x-6' : 'translate-x-1'}`,
+                        }),
+                    ]);
+                    break;
                 default:
                     inputElement = h('input', {
                         type: option.type,
@@ -233,6 +253,12 @@ const save = () => {
 // watch isOpen prop
 watch(() => props.isOpen, (isOpen) => {
     if (isOpen) {
+        resetSaveAsName();
+    }
+});
+// watch client prop
+watch(() => props.client, (client) => {
+    if (client) {
         resetSaveAsName();
     }
 });

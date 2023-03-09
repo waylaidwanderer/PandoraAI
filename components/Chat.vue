@@ -116,7 +116,7 @@ const sendMessage = async (input) => {
                 }
                 if (message.event === 'result') {
                     const result = JSON.parse(message.data);
-                    if (result.conversationSignature && !result.messageId) {
+                    if (result.conversationSignature) {
                         conversationData.value = {
                             conversationId: result.conversationId,
                             conversationSignature: result.conversationSignature,

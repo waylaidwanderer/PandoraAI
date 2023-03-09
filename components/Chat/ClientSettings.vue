@@ -35,10 +35,6 @@ const availableOptions = {
                     type: 'text',
                     label: 'OpenAI API Key',
                 },
-                promptPrefix: {
-                    type: 'text',
-                    label: 'Instructions (Prompt Prefix)',
-                },
                 userLabel: {
                     type: 'text',
                     label: "User's Name",
@@ -46,6 +42,10 @@ const availableOptions = {
                 chatGptLabel: {
                     type: 'text',
                     label: "AI's Name",
+                },
+                promptPrefix: {
+                    type: 'textarea',
+                    label: 'Instructions (Prompt Prefix)',
                 },
                 modelOptions: {
                     type: 'nested',
@@ -57,7 +57,7 @@ const availableOptions = {
                             default: 'gpt-3.5-turbo',
                         },
                         temperature: {
-                            type: 'number',
+                            type: 'range',
                             label: 'Temperature',
                             range: [0, 2],
                             default: 0.8,
@@ -127,7 +127,16 @@ const generateForm = (options, parentKey, levels = 0) => {
                 ...generateForm(option.properties, optionKey, levels + 1),
             ]);
         } else { // other types like text, number, checkbox etc.
-            // TODO: checkbox styling
+            // TODO: checkbox styling, range slider, textarea
+            let classList = 'placeholder-white/40 text-slate-300 text-sm rounded py-2 focus:outline-none';
+            switch (option.type) {
+                case 'range':
+                    classList = `${classList} bg-transparent`;
+                    break;
+                default:
+                    classList = `${classList} shadow-inner bg-white/5 px-3`;
+                    break;
+            }
             return h('input', {
                 type: option.type,
                 placeholder: option.label,
@@ -141,7 +150,7 @@ const generateForm = (options, parentKey, levels = 0) => {
                     }
                     return set(formClientOptions, optionKey, inputValue);
                 },
-                class:'shadow-inner bg-white/10 placeholder-white/40 text-slate-300 text-sm rounded p-2 focus:outline-none'
+                class: classList,
             });
         }
     });
@@ -197,7 +206,12 @@ const save = () => {
                                 <div class="flex justify-end mt-4">
                                     <button
                                         type="button"
-                                        class="inline-flex justify-center px-4 py-2 text-sm font-medium text-slate-100 bg-slate-500 border border-transparent rounded-md hover:bg-slate-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-slate-500"
+                                        class="
+                                            flex items-center
+                                            px-4 py-2 text-slate-300 rounded bg-white/10 backdrop-blur-sm
+                                            transition duration-300 ease-in-out
+                                            hover:bg-white/10 hover:backdrop-blur-sm
+                                        "
                                         @click="save"
                                     >
                                         Save

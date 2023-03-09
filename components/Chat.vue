@@ -459,4 +459,29 @@ if (!process.server) {
 .prose p {
     word-break: break-word;
 }
+
+/* Getting rid of the main default styling of the range input */
+input[type="range"] {
+    -webkit-appearance: none;
+}
+
+input[type="range"]:focus {
+    outline: none;
+}
+
+/* Styling the track */
+input[type="range"]::-webkit-slider-runnable-track,
+input[type="range"]::-moz-range-track {
+    @apply h-1 bg-white/10 rounded;
+}
+
+/* Styling the thumb */
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    @apply w-4 h-4 bg-slate-300 rounded-full;
+}
+
+input[type="range"]::-moz-range-thumb {
+    @apply w-4 h-4 bg-slate-300 rounded-full;
+}
 </style>

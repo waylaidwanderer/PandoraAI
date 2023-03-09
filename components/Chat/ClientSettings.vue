@@ -54,37 +54,36 @@ const availableOptions = {
                         model: {
                             type: 'text',
                             label: 'Model',
-                            default: 'gpt-3.5-turbo',
                         },
                         temperature: {
                             type: 'range',
                             label: 'Temperature',
                             range: [0, 2],
-                            default: 0.8,
+                            step: 0.01,
                         },
                         top_p: {
-                            type: 'number',
+                            type: 'range',
                             label: 'Top P',
                             range: [0, 1],
-                            default: 1,
+                            step: 0.01,
                         },
                         presence_penalty: {
-                            type: 'number',
+                            type: 'range',
                             label: 'Presence Penalty',
                             range: [-2, 2],
-                            default: 0,
+                            step: 0.01,
                         },
                         frequency_penalty: {
-                            type: 'number',
+                            type: 'range',
                             label: 'Frequency Penalty',
                             range: [-2, 2],
-                            default: 0.6,
+                            step: 0.01,
                         },
                         max_tokens: {
-                            type: 'number',
+                            type: 'range',
                             label: 'Max Tokens',
-                            range: [1, null],
-                            default: 1024,
+                            range: [1, 4096],
+                            step: 1,
                         },
                     },
                 },
@@ -109,7 +108,7 @@ const availableOptions = {
     },
 };
 
-const formClientOptions = {};
+const formClientOptions = ref({});
 
 // Recursive form generation component
 const generateForm = (options, parentKey, levels = 0) => {
@@ -128,7 +127,7 @@ const generateForm = (options, parentKey, levels = 0) => {
             ]);
         } else { // other types like text, number, checkbox etc.
             // TODO: checkbox styling, range slider, textarea
-            let classList = 'placeholder-white/40 text-slate-300 text-sm rounded py-2 focus:outline-none';
+            let classList = 'w-full placeholder-white/40 text-slate-300 text-sm rounded py-2 focus:outline-none';
             switch (option.type) {
                 case 'range':
                     classList = `${classList} bg-transparent`;
@@ -137,21 +136,33 @@ const generateForm = (options, parentKey, levels = 0) => {
                     classList = `${classList} shadow-inner bg-white/5 px-3`;
                     break;
             }
-            return h('input', {
-                type: option.type,
-                placeholder: option.label,
-                value: get(formClientOptions, optionKey),
-                onInput: (e) => {
-                    let inputValue = e.target.value;
-                    if (option.type === 'number') {
-                        inputValue = Number(inputValue);
-                    } else if (option.type === 'checkbox') {
-                        inputValue = e.target.checked;
-                    }
-                    return set(formClientOptions, optionKey, inputValue);
-                },
-                class: classList,
-            });
+            const inputValue = get(formClientOptions.value, optionKey);
+            return h('div', {
+                class: 'flex flex-col gap-2',
+            }, [
+                h('label',
+                    { class: 'text-white/60 text-xs' },
+                    option.type === 'range' ? `${option.label}: ${typeof inputValue === 'undefined' ? 'default server value' : inputValue}` : option.label,
+                ),
+                h('input', {
+                    type: option.type,
+                    placeholder: 'default server value',
+                    value: inputValue,
+                    min: option.range ? option.range[0] : null,
+                    max: option.range ? option.range[1] : null,
+                    step: option.step || null,
+                    onInput: (e) => {
+                        let inputValue = e.target.value;
+                        if (option.type === 'number' || option.type === 'range') {
+                            inputValue = Number(inputValue);
+                        } else if (option.type === 'checkbox') {
+                            inputValue = e.target.checked;
+                        }
+                        return set(formClientOptions.value, optionKey, inputValue);
+                    },
+                    class: classList,
+                })
+            ]);
         }
     });
 };

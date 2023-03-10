@@ -115,16 +115,40 @@ const sendMessage = async (input) => {
 
     const botMessage = messages.value[messages.value.length - 1];
 
+    let clientOptions;
+    if (activePreset.value?.options.clientOptions) {
+        clientOptions = {
+            ...activePreset.value?.options.clientOptions,
+            clientToUse: activePreset.value?.client,
+        };
+    } else {
+        clientOptions = {
+            clientToUse: activePresetName.value,
+        };
+    }
+
+    const data = {
+        ...conversationData.value,
+        message: input,
+        stream: true,
+        clientOptions,
+    };
+
+    if (
+        activePreset.value
+        && activePreset.value.client === 'bing'
+        && activePreset.value.options.jailbreakMode
+        && !conversationData.value.jailbreakConversationId
+    ) {
+        data.jailbreakConversationId = true;
+    }
+
     const opts = {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-            ...conversationData.value,
-            message: input,
-            stream: true,
-        }),
+        body: JSON.stringify(data),
     };
 
     try {
@@ -150,7 +174,12 @@ const sendMessage = async (input) => {
                 }
                 if (message.event === 'result') {
                     const result = JSON.parse(message.data);
-                    if (result.conversationSignature && !result.messageId) {
+                    if (result.jailbreakConversationId) {
+                        conversationData.value = {
+                            jailbreakConversationId: result.jailbreakConversationId,
+                            parentMessageId: result.messageId,
+                        };
+                    } else if (result.conversationSignature) {
                         conversationData.value = {
                             conversationId: result.conversationId,
                             conversationSignature: result.conversationSignature,

@@ -34,7 +34,22 @@ export const usePresetsStore = defineStore('presetsStore', () => {
     }
 
     function getPreset(name) {
-        return presets.value.find((preset) => preset.name === name);
+        let nameToUse;
+        switch (name) {
+            case 'chatgpt':
+                nameToUse = 'OpenAI API';
+                break;
+            case 'chatgpt-browser':
+                nameToUse = 'ChatGPT';
+                break;
+            case 'bing':
+                nameToUse = 'Bing';
+                break;
+            default:
+                nameToUse = name;
+                break;
+        }
+        return presets.value.find(preset => preset.name === nameToUse);
     }
 
     function deletePreset(name) {

@@ -24,7 +24,7 @@ const props = defineProps({
     client: {
         type: String,
     },
-    presetId: {
+    presetName: {
         type: String,
     },
 });
@@ -251,7 +251,7 @@ const resetSaveAsName = () => {
 };
 
 const save = () => {
-    setPreset(props.presetId, saveAsName.value, props.client, formClientOptions.value, saveAsName.value !== defaultSaveAsName.value);
+    setPreset(saveAsName.value, props.client, formClientOptions.value, saveAsName.value !== defaultSaveAsName.value);
     props.setIsOpen(false);
 };
 
@@ -265,7 +265,7 @@ watch(() => props.isOpen, (isOpen) => {
 watch(() => props.client, (client) => {
     if (client) {
         resetSaveAsName();
-        formClientOptions.value = getPreset(props.presetId)?.options || {};
+        formClientOptions.value = getPreset(defaultSaveAsName.value)?.options || {};
     }
 });
 </script>

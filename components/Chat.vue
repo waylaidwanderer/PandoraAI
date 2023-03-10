@@ -30,17 +30,17 @@ const config = useRuntimeConfig();
 
 const presetsStore = usePresetsStore();
 const {
-    activePresetId,
+    activePresetName,
     activePreset,
 } = storeToRefs(presetsStore);
 const {
-    setActivePresetId,
+    setActivePresetName,
 } = presetsStore;
 
 const isClientDropdownOpen = ref(false);
 const isClientSettingsModalOpen = ref(false);
 const clientSettingsModalClient = ref(null);
-const clientSettingsModalPresetId = ref(null);
+const clientSettingsModalPresetName = ref(null);
 
 const messages = ref([]);
 const message = ref('');
@@ -245,10 +245,10 @@ const parseMarkdown = (text, streaming = false) => {
     return DOMPurify.sanitize(parsed);
 };
 
-const setIsClientSettingsModalOpen = (isOpen, client = null, presetId = null) => {
+const setIsClientSettingsModalOpen = (isOpen, client = null, presetName = null) => {
     isClientSettingsModalOpen.value = isOpen;
     clientSettingsModalClient.value = client;
-    clientSettingsModalPresetId.value = presetId || client;
+    clientSettingsModalPresetName.value = presetName || client;
 };
 
 if (!process.server) {
@@ -270,7 +270,7 @@ if (!process.server) {
             :is-open="isClientSettingsModalOpen"
             :set-is-open="setIsClientSettingsModalOpen"
             :client="clientSettingsModalClient"
-            :preset-id="clientSettingsModalPresetId"
+            :preset-name="clientSettingsModalPresetName"
         />
     </client-only>
     <div class="flex flex-col flex-grow items-center">
@@ -333,8 +333,8 @@ if (!process.server) {
                 <Transition name="slide-from-bottom">
                     <ClientDropdown
                         v-if="isClientDropdownOpen"
-                        :preset-id="activePresetId"
-                        :set-client-to-use="setActivePresetId"
+                        :preset-name="activePresetName"
+                        :set-client-to-use="setActivePresetName"
                         :set-is-client-settings-modal-open="setIsClientSettingsModalOpen"
                     />
                 </Transition>
@@ -346,7 +346,7 @@ if (!process.server) {
                 >
                     <Transition name="fade" mode="out-in">
                         <GPTIcon
-                            v-if="activePresetId === 'chatgpt' || activePreset?.client === 'chatgpt'"
+                            v-if="activePresetName === 'chatgpt' || activePreset?.client === 'chatgpt'"
                             class="w-10 h-10 p-2 block shadow transition duration-300 ease-in-out rounded-lg"
                             :class="{
                                 'opacity-50 cursor-not-allowed': !!processingController,
@@ -354,7 +354,7 @@ if (!process.server) {
                             }"
                         />
                         <GPTIcon
-                            v-else-if="activePresetId === 'chatgpt-browser' || activePreset?.client === 'chatgpt-browser'"
+                            v-else-if="activePresetName === 'chatgpt-browser' || activePreset?.client === 'chatgpt-browser'"
                             class="w-10 h-10 p-2 text-[#6ea194] block shadow transition duration-300 ease-in-out rounded-lg"
                             :class="{
                                 'opacity-50 cursor-not-allowed': !!processingController,
@@ -362,7 +362,7 @@ if (!process.server) {
                             }"
                         />
                         <BingIcon
-                            v-else-if="activePresetId === 'bing' || activePreset?.client === 'bing'"
+                            v-else-if="activePresetName === 'bing' || activePreset?.client === 'bing'"
                             class="w-10 h-10 p-2 block shadow transition duration-300 ease-in-out rounded-lg"
                             :class="{
                                 'opacity-50 cursor-not-allowed': !!processingController,

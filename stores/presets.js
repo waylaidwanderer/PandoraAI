@@ -2,35 +2,26 @@ import { v4 as uuidv4 } from 'uuid';
 
 export const usePresetsStore = defineStore('presetsStore', () => {
     const presets = useLocalStorage('presetsStore/presets', []);
-    const activePresetId = useLocalStorage('presetsStore/activePresetId', 'chatgpt');
-    const activePreset = computed(() => getPreset(activePresetId.value));
+    const activePresetName = useLocalStorage('presetsStore/activePresetName', 'chatgpt');
+    const activePreset = computed(() => getPreset(activePresetName.value));
 
-    function setActivePresetId(id) {
-        activePresetId.value = id;
+    function setActivePresetName(name) {
+        activePresetName.value = name;
     }
 
-    function setPreset(id, name, client, options, setActive) {
+    function setPreset(name, client, options, setActive) {
         let preset;
         // update preset by ID or add new
-        const existingIndex = presets.value.findIndex(_preset => _preset.id === id);
+        const existingIndex = presets.value.findIndex(_preset => _preset.name === name);
         if (existingIndex !== -1) {
             const existingPreset = presets.value[existingIndex];
             // only update options as the other values are not editable
             existingPreset.options = options;
             presets.value[existingIndex] = existingPreset;
+            preset = existingPreset;
         } else {
-            // count how many other presets have the same name
-            const count = presets.value.filter(_preset => _preset.name === name).length;
-            // if there are any, append a number to the name
-            let newName;
-            if (count > 0) {
-                newName = `${name} (${count + 1})`;
-            } else {
-                newName = name;
-            }
             preset = {
-                id: id || uuidv4(),
-                name: newName,
+                name,
                 client,
                 options,
                 createdAt: Date.now(),
@@ -38,19 +29,19 @@ export const usePresetsStore = defineStore('presetsStore', () => {
             presets.value.push(preset);
         }
         if (setActive) {
-            activePresetId.value = preset.id;
+            activePresetName.value = preset.name;
         }
     }
 
-    function getPreset(id) {
-        return presets.value.find((preset) => preset.id === id);
+    function getPreset(name) {
+        return presets.value.find((preset) => preset.name === name);
     }
 
     return {
         presets,
-        activePresetId,
+        activePresetName,
         activePreset,
-        setActivePresetId,
+        setActivePresetName,
         setPreset,
         getPreset,
     };

@@ -39,6 +39,18 @@ const availableOptions = {
                     type: 'text',
                     label: 'OpenAI API Key',
                 },
+                reverseProxyUrl: {
+                    type: 'text',
+                    label: 'Reverse Proxy URL',
+                },
+                maxContextTokens: {
+                    type: 'number',
+                    label: 'Max Context Tokens',
+                },
+                maxPromptTokens: {
+                    type: 'number',
+                    label: 'Max Prompt Tokens',
+                },
                 userLabel: {
                     type: 'text',
                     label: "User's Name",
@@ -92,6 +104,26 @@ const availableOptions = {
                     },
                 },
             }
+        },
+    },
+    'chatgpt-browser': {
+        clientOptions: {
+            type: 'nested',
+            label: 'Client Options',
+            properties: {
+                reverseProxyUrl: {
+                    type: 'text',
+                    label: 'Reverse Proxy URL',
+                },
+                accessToken: {
+                    type: 'textarea',
+                    label: 'Access Token',
+                },
+                cookies: {
+                    type: 'textarea',
+                    label: 'Cookies',
+                },
+            },
         },
     },
     bing: {

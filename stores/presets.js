@@ -37,6 +37,13 @@ export const usePresetsStore = defineStore('presetsStore', () => {
         return presets.value.find((preset) => preset.name === name);
     }
 
+    function deletePreset(name) {
+        const existingIndex = presets.value.findIndex(_preset => _preset.name === name);
+        if (existingIndex !== -1) {
+            presets.value.splice(existingIndex, 1);
+        }
+    }
+
     return {
         presets,
         activePresetName,
@@ -44,6 +51,7 @@ export const usePresetsStore = defineStore('presetsStore', () => {
         setActivePresetName,
         setPreset,
         getPreset,
+        deletePreset,
     };
 });
 

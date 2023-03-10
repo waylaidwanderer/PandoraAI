@@ -120,6 +120,8 @@ const presetStore = usePresetsStore();
 const {
     setPreset,
     getPreset,
+    deletePreset,
+    setActivePresetName,
 } = presetStore;
 
 // computed default saveAsName based on client, using switch
@@ -258,6 +260,12 @@ const save = () => {
     props.setIsOpen(false);
 };
 
+const deletePresetHandler = () => {
+    deletePreset(saveAsName.value);
+    setActivePresetName('chatgpt');
+    props.setIsOpen(false);
+};
+
 // watch isOpen prop
 watch(() => props.isOpen, (isOpen) => {
     if (isOpen) {
@@ -315,6 +323,17 @@ watch(() => props.client, (client) => {
                                 </div>
 
                                 <div class="flex justify-end mt-4 gap-2">
+                                    <!-- Delete button -->
+                                    <Transition name="fade">
+                                        <button
+                                            v-if="saveAsName === defaultSaveAsName"
+                                            type="button"
+                                            class="flex items-center px-2 rounded bg-red-500/50 text-white/70 hover:text-white/90 hover:bg-red-500/60 transition duration-300"
+                                            @click="deletePresetHandler"
+                                        >
+                                            <Icon name="bx:bx-trash" />
+                                        </button>
+                                    </Transition>
                                     <!-- Save as Name input -->
                                     <div class="relative flex items-stretch shadow-inner bg-white/5 rounded">
                                         <label class="text-white/60 text-xs h-full flex items-center px-3 border-r border-white/5">

@@ -23,7 +23,9 @@ const props = defineProps({
     },
     client: {
         type: String,
-        default: 'chatgpt',
+    },
+    presetId: {
+        type: String,
     },
 });
 
@@ -115,8 +117,10 @@ const availableOptions = {
 };
 
 const presetStore = usePresetsStore();
-const { addPreset } = presetStore;
-const formClientOptions = ref({});
+const {
+    setPreset,
+    getPreset,
+} = presetStore;
 
 // computed default saveAsName based on client, using switch
 const defaultSaveAsName = computed(() => {
@@ -135,7 +139,9 @@ const defaultSaveAsName = computed(() => {
     }
 });
 
-const saveAsName = ref('');
+const saveAsName = ref(defaultSaveAsName.value);
+
+const formClientOptions = ref({});
 
 // Recursive form generation component
 const generateForm = (options, parentKey, levels = 0) => {
@@ -153,7 +159,6 @@ const generateForm = (options, parentKey, levels = 0) => {
                 ...generateForm(option.properties, optionKey, levels + 1),
             ]);
         } else { // other types like text, range, checkbox etc.
-            // TODO: checkbox styling
             let classList = 'w-full placeholder-white/40 text-slate-300 text-sm rounded py-2 focus:outline-none';
             switch (option.type) {
                 case 'range':
@@ -246,8 +251,9 @@ const resetSaveAsName = () => {
 };
 
 const save = () => {
-    console.log(formClientOptions.value);
-    addPreset(saveAsName.value, props.client, formClientOptions.value, saveAsName.value !== defaultSaveAsName.value);
+    console.log(JSON.stringify(formClientOptions.value, null, 2));
+    setPreset(props.presetId, saveAsName.value, props.client, formClientOptions.value, saveAsName.value !== defaultSaveAsName.value);
+    props.setIsOpen(false);
 };
 
 // watch isOpen prop
@@ -260,6 +266,7 @@ watch(() => props.isOpen, (isOpen) => {
 watch(() => props.client, (client) => {
     if (client) {
         resetSaveAsName();
+        formClientOptions.value = getPreset(props.presetId)?.options || {};
     }
 });
 </script>

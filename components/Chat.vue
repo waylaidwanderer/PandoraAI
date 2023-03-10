@@ -39,6 +39,7 @@ const {
 const isClientDropdownOpen = ref(false);
 const isClientSettingsModalOpen = ref(false);
 const clientSettingsModalClient = ref(null);
+const clientSettingsModalPresetId = ref(null);
 
 const messages = ref([]);
 const message = ref('');
@@ -245,9 +246,10 @@ const parseMarkdown = (text, streaming = false) => {
     return DOMPurify.sanitize(parsed);
 };
 
-const setIsClientSettingsModalOpen = (isOpen, client = null) => {
+const setIsClientSettingsModalOpen = (isOpen, client = null, presetId = null) => {
     isClientSettingsModalOpen.value = isOpen;
     clientSettingsModalClient.value = client;
+    clientSettingsModalPresetId.value = presetId || client;
 };
 
 if (!process.server) {
@@ -269,6 +271,7 @@ if (!process.server) {
             :is-open="isClientSettingsModalOpen"
             :set-is-open="setIsClientSettingsModalOpen"
             :client="clientSettingsModalClient"
+            :preset-id="clientSettingsModalPresetId"
         />
     </client-only>
     <div class="flex flex-col flex-grow items-center">

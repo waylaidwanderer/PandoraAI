@@ -127,6 +127,9 @@ const defaultSaveAsName = computed(() => {
     if (!props.client) {
         return '';
     }
+    if (props.presetName !== props.client) {
+        return props.presetName;
+    }
     switch (props.client) {
         case 'chatgpt':
             return 'OpenAI API';

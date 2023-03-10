@@ -20,7 +20,8 @@ defineProps({
 });
 
 const presetsStore = usePresetsStore();
-// const { presets } = storeToRefs(presetsStore);
+const { presets } = storeToRefs(presetsStore);
+const customPresets = computed(() => presets.value.filter(preset => !['OpenAI API', 'ChatGPT', 'Bing'].includes(preset.name)));
 </script>
 
 <template>
@@ -71,6 +72,36 @@ const presetsStore = usePresetsStore();
             <button
                 class="hover:bg-white/20 px-3 py-1 flex items-center transition ease-in-out"
                 @click="setIsClientSettingsModalOpen(true, 'bing')"
+            >
+                <Icon class="w-5 h-5 text-white/70" name="bx:bxs-cog" />
+            </button>
+        </div>
+        <div
+            v-for="preset in customPresets"
+            class="w-full flex flex-row"
+        >
+            <button
+                class="w-full px-3 py-1 flex flex-row items-center transition ease-in-out hover:bg-white/20 text-sm"
+                :class="{ 'font-bold': presetName === preset.name }"
+                @click="setClientToUse(preset.name)"
+            >
+                <GPTIcon
+                    v-if="preset.client === 'chatgpt'"
+                    class="h-9 py-2 pr-2 shadow rounded-lg"
+                />
+                <GPTIcon
+                    v-else-if="preset.client === 'chatgpt-browser'"
+                    class="h-9 py-2 pr-2 text-[#6ea194] shadow rounded-lg"
+                />
+                <BingIcon
+                    v-else-if="preset.client === 'bing'"
+                    class="h-9 py-2 pr-2 shadow rounded-lg"
+                />
+                {{ preset.name }}
+            </button>
+            <button
+                class="hover:bg-white/20 px-3 py-1 flex items-center transition ease-in-out"
+                @click="setIsClientSettingsModalOpen(true, preset.client, preset.name)"
             >
                 <Icon class="w-5 h-5 text-white/70" name="bx:bxs-cog" />
             </button>

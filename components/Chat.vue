@@ -248,6 +248,7 @@ const parseMarkdown = (text, streaming = false) => {
 const setIsClientSettingsModalOpen = (isOpen, client = null, presetName = null) => {
     isClientSettingsModalOpen.value = isOpen;
     clientSettingsModalClient.value = client;
+    console.log(presetName);
     clientSettingsModalPresetName.value = presetName || client;
 };
 

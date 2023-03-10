@@ -340,33 +340,35 @@ if (!process.server) {
                 </Transition>
                 <button
                     @click="isClientDropdownOpen = !isClientDropdownOpen"
-                    @blur.native="isClientDropdownOpen = false"
                     class="flex items-center w-10 h-10 my-auto ml-2 justify-center absolute left-0 top-0 bottom-0 z-10"
                     :disabled="!!processingController"
                 >
                     <Transition name="fade" mode="out-in">
                         <GPTIcon
                             v-if="activePresetName === 'chatgpt' || activePreset?.client === 'chatgpt'"
-                            class="w-10 h-10 p-2 block shadow transition duration-300 ease-in-out rounded-lg"
+                            class="w-10 h-10 p-2 block transition duration-300 ease-in-out rounded-lg"
                             :class="{
                                 'opacity-50 cursor-not-allowed': !!processingController,
-                                'hover:bg-black/30 cursor-pointer': !processingController,
+                                'hover:bg-black/30 cursor-pointer hover:shadow': !processingController,
+                                'bg-black/30 shadow': isClientDropdownOpen,
                             }"
                         />
                         <GPTIcon
                             v-else-if="activePresetName === 'chatgpt-browser' || activePreset?.client === 'chatgpt-browser'"
-                            class="w-10 h-10 p-2 text-[#6ea194] block shadow transition duration-300 ease-in-out rounded-lg"
+                            class="w-10 h-10 p-2 text-[#6ea194] block transition duration-300 ease-in-out rounded-lg"
                             :class="{
                                 'opacity-50 cursor-not-allowed': !!processingController,
-                                'hover:bg-black/30 cursor-pointer': !processingController,
+                                'hover:bg-black/30 cursor-pointer hover:shadow': !processingController,
+                                'bg-black/30 shadow': isClientDropdownOpen,
                             }"
                         />
                         <BingIcon
                             v-else-if="activePresetName === 'bing' || activePreset?.client === 'bing'"
-                            class="w-10 h-10 p-2 block shadow transition duration-300 ease-in-out rounded-lg"
+                            class="w-10 h-10 p-2 block transition duration-300 ease-in-out rounded-lg"
                             :class="{
                                 'opacity-50 cursor-not-allowed': !!processingController,
-                                'hover:bg-black/30 cursor-pointer': !processingController,
+                                'hover:bg-black/30 cursor-pointer hover:shadow': !processingController,
+                                'bg-black/30 shadow': isClientDropdownOpen,
                             }"
                         />
                     </Transition>

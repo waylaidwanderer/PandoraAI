@@ -52,6 +52,8 @@ const messagesContainerElement = ref(null);
 const inputContainerElement = ref(null);
 const inputTextElement = ref(null);
 
+const canChangePreset = computed(() => !processingController.value && Object.keys(conversationData.value).length === 0);
+
 // compute number of rows for textarea based on message newlines, up to 7
 const inputRows = computed(() => {
     const newlines = (message.value.match(/\n/g) || []).length;
@@ -86,6 +88,8 @@ const sendMessage = async (input) => {
     if (!input) {
         return;
     }
+
+    isClientDropdownOpen.value = false;
 
     suggestedResponses.value = [];
     processingController.value = new AbortController();
@@ -341,7 +345,7 @@ if (!process.server) {
                 <button
                     @click="isClientDropdownOpen = !isClientDropdownOpen"
                     class="flex items-center w-10 h-10 my-auto ml-2 justify-center absolute left-0 top-0 bottom-0 z-10"
-                    :disabled="!!processingController"
+                    :disabled="!canChangePreset"
                 >
                     <Transition name="fade" mode="out-in">
                         <GPTIcon
@@ -349,7 +353,8 @@ if (!process.server) {
                             class="w-10 h-10 p-2 block transition duration-300 ease-in-out rounded-lg"
                             :class="{
                                 'opacity-50 cursor-not-allowed': !!processingController,
-                                'hover:bg-black/30 cursor-pointer hover:shadow': !processingController,
+                                'opacity-80': !canChangePreset,
+                                'hover:bg-black/30 cursor-pointer hover:shadow': canChangePreset,
                                 'bg-black/30 shadow': isClientDropdownOpen,
                             }"
                         />
@@ -358,7 +363,8 @@ if (!process.server) {
                             class="w-10 h-10 p-2 text-[#6ea194] block transition duration-300 ease-in-out rounded-lg"
                             :class="{
                                 'opacity-50 cursor-not-allowed': !!processingController,
-                                'hover:bg-black/30 cursor-pointer hover:shadow': !processingController,
+                                'opacity-80': !canChangePreset,
+                                'hover:bg-black/30 cursor-pointer hover:shadow': canChangePreset,
                                 'bg-black/30 shadow': isClientDropdownOpen,
                             }"
                         />
@@ -367,7 +373,8 @@ if (!process.server) {
                             class="w-10 h-10 p-2 block transition duration-300 ease-in-out rounded-lg"
                             :class="{
                                 'opacity-50 cursor-not-allowed': !!processingController,
-                                'hover:bg-black/30 cursor-pointer hover:shadow': !processingController,
+                                'opacity-80': !canChangePreset,
+                                'hover:bg-black/30 cursor-pointer hover:shadow': canChangePreset,
                                 'bg-black/30 shadow': isClientDropdownOpen,
                             }"
                         />

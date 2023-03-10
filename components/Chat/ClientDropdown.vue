@@ -1,9 +1,11 @@
 <script setup>
 import GPTIcon from '~/components/Icons/GPTIcon.vue';
 import BingIcon from '~/components/Icons/BingIcon.vue';
+import { usePresetsStore } from '~/stores/presets';
+import { storeToRefs } from 'pinia';
 
 defineProps({
-    clientToUse: {
+    presetId: {
         type: String,
         required: true,
     },
@@ -16,6 +18,9 @@ defineProps({
         required: true,
     },
 });
+
+const presetsStore = usePresetsStore();
+// const { presets } = storeToRefs(presetsStore);
 </script>
 
 <template>
@@ -25,7 +30,7 @@ defineProps({
         <div class="w-full flex flex-row">
             <button
                 class="px-3 py-1 flex-1 flex flex-row items-center transition ease-in-out hover:bg-white/20 text-sm"
-                :class="{ 'font-bold': clientToUse === 'chatgpt' }"
+                :class="{ 'font-bold': presetId === 'chatgpt' }"
                 @click="setClientToUse('chatgpt')"
             >
                 <GPTIcon class="h-9 py-2 pr-2 shadow rounded-lg" />
@@ -41,7 +46,7 @@ defineProps({
         <div class="w-full flex flex-row">
             <button
                 class="w-full px-3 py-1 flex flex-row items-center transition ease-in-out hover:bg-white/20 border-t border-b border-white/5 text-sm"
-                :class="{ 'font-bold': clientToUse === 'chatgpt-browser' }"
+                :class="{ 'font-bold': presetId === 'chatgpt-browser' }"
                 @click="setClientToUse('chatgpt-browser')"
             >
                 <GPTIcon class="h-9 py-2 pr-2 text-[#6ea194] shadow rounded-lg" />
@@ -57,7 +62,7 @@ defineProps({
         <div class="w-full flex flex-row">
             <button
                 class="w-full px-3 py-1 flex flex-row items-center transition ease-in-out hover:bg-white/20 text-sm"
-                :class="{ 'font-bold': clientToUse === 'bing' }"
+                :class="{ 'font-bold': presetId === 'bing' }"
                 @click="setClientToUse('bing')"
             >
                 <BingIcon class="h-9 py-2 pr-2 shadow rounded-lg" />

@@ -2,7 +2,12 @@ import { v4 as uuidv4 } from 'uuid';
 
 export const usePresetsStore = defineStore('presetsStore', () => {
     const presets = useLocalStorage('presetsStore/presets', []);
-    const activePreset = useLocalStorage('presetsStore/activePreset', null);
+    const activePresetId = useLocalStorage('presetsStore/activePresetId', 'chatgpt');
+    const activePreset = computed(() => getPreset(activePresetId.value));
+
+    function setActivePresetId(id) {
+        activePresetId.value = id;
+    }
 
     function setPreset(id, name, client, options, setActive) {
         let preset;
@@ -33,13 +38,8 @@ export const usePresetsStore = defineStore('presetsStore', () => {
             presets.value.push(preset);
         }
         if (setActive) {
-            activePreset.value = preset;
+            activePresetId.value = preset.id;
         }
-    }
-
-    function updatePresetOptions(id, options) {
-        const preset = presets.value.find((preset) => preset.id === id);
-        preset.options = options;
     }
 
     function getPreset(id) {
@@ -48,7 +48,9 @@ export const usePresetsStore = defineStore('presetsStore', () => {
 
     return {
         presets,
+        activePresetId,
         activePreset,
+        setActivePresetId,
         setPreset,
         getPreset,
     };

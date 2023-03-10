@@ -8,7 +8,6 @@ import BingIcon from '~/components/Icons/BingIcon.vue';
 import GPTIcon from '~/components/Icons/GPTIcon.vue';
 import ClientDropdown from '~/components/Chat/ClientDropdown.vue';
 import ClientSettings from '~/components/Chat/ClientSettings.vue';
-import { useChatStore } from '~/stores/chat';
 import { storeToRefs } from 'pinia';
 
 marked.setOptions({
@@ -28,13 +27,15 @@ marked.setOptions({
 });
 
 const config = useRuntimeConfig();
-const chatStore = useChatStore();
+
+const presetsStore = usePresetsStore();
 const {
-    clientToUse,
-} = storeToRefs(chatStore);
+    activePresetId,
+    activePreset,
+} = storeToRefs(presetsStore);
 const {
-    setClientToUse,
-} = chatStore;
+    setActivePresetId,
+} = presetsStore;
 
 const isClientDropdownOpen = ref(false);
 const isClientSettingsModalOpen = ref(false);
@@ -332,8 +333,8 @@ if (!process.server) {
                 <Transition name="slide-from-bottom">
                     <ClientDropdown
                         v-if="isClientDropdownOpen"
-                        :set-client-to-use="setClientToUse"
-                        :client-to-use="clientToUse"
+                        :preset-id="activePresetId"
+                        :set-client-to-use="setActivePresetId"
                         :set-is-client-settings-modal-open="setIsClientSettingsModalOpen"
                     />
                 </Transition>
@@ -345,7 +346,7 @@ if (!process.server) {
                 >
                     <Transition name="fade" mode="out-in">
                         <GPTIcon
-                            v-if="clientToUse === 'chatgpt'"
+                            v-if="activePresetId === 'chatgpt' || activePreset?.client === 'chatgpt'"
                             class="w-10 h-10 p-2 block shadow transition duration-300 ease-in-out rounded-lg"
                             :class="{
                                 'opacity-50 cursor-not-allowed': !!processingController,
@@ -353,7 +354,7 @@ if (!process.server) {
                             }"
                         />
                         <GPTIcon
-                            v-else-if="clientToUse === 'chatgpt-browser'"
+                            v-else-if="activePresetId === 'chatgpt-browser' || activePreset?.client === 'chatgpt-browser'"
                             class="w-10 h-10 p-2 text-[#6ea194] block shadow transition duration-300 ease-in-out rounded-lg"
                             :class="{
                                 'opacity-50 cursor-not-allowed': !!processingController,
@@ -361,7 +362,7 @@ if (!process.server) {
                             }"
                         />
                         <BingIcon
-                            v-else-if="clientToUse === 'bing'"
+                            v-else-if="activePresetId === 'bing' || activePreset?.client === 'bing'"
                             class="w-10 h-10 p-2 block shadow transition duration-300 ease-in-out rounded-lg"
                             :class="{
                                 'opacity-50 cursor-not-allowed': !!processingController,

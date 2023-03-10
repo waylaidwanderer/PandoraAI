@@ -127,14 +127,12 @@ const sendMessage = async (input) => {
             ...opts,
             signal: processingController.value.signal,
             onopen(response) {
-                console.log('opened', response);
                 if (response.status === 200) {
                     return;
                 }
                 throw new Error(`Failed to send message. HTTP ${response.status} - ${response.statusText}`);
             },
             onclose() {
-                console.log('closed');
                 throw new Error(`Failed to send message. Server closed the connection unexpectedly.`);
             },
             onerror(err) {
@@ -188,7 +186,7 @@ const sendMessage = async (input) => {
             },
         });
     } catch (err) {
-        console.log('ERROR', err);
+        console.error('ERROR', err);
     } finally {
         if (!processingController.value.signal.aborted) {
             processingController.value.abort();

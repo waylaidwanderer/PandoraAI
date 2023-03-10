@@ -251,7 +251,6 @@ const resetSaveAsName = () => {
 };
 
 const save = () => {
-    console.log(JSON.stringify(formClientOptions.value, null, 2));
     setPreset(props.presetId, saveAsName.value, props.client, formClientOptions.value, saveAsName.value !== defaultSaveAsName.value);
     props.setIsOpen(false);
 };

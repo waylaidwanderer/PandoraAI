@@ -5,17 +5,31 @@ export const usePresetsStore = defineStore('presetsStore', () => {
     const activePreset = useLocalStorage('presetsStore/activePreset', null);
 
     function setPreset(id, name, client, options, setActive) {
-        const preset = {
-            id: id || uuidv4(),
-            name,
-            client,
-            options,
-        };
+        let preset;
         // update preset by ID or add new
-        const existingIndex = presets.value.findIndex((preset) => preset.id === id);
+        const existingIndex = presets.value.findIndex(_preset => _preset.id === id);
         if (existingIndex !== -1) {
-            presets.value[existingIndex] = preset;
+            const existingPreset = presets.value[existingIndex];
+            // only update options as the other values are not editable
+            existingPreset.options = options;
+            presets.value[existingIndex] = existingPreset;
         } else {
+            // count how many other presets have the same name
+            const count = presets.value.filter(_preset => _preset.name === name).length;
+            // if there are any, append a number to the name
+            let newName;
+            if (count > 0) {
+                newName = `${name} (${count + 1})`;
+            } else {
+                newName = name;
+            }
+            preset = {
+                id: id || uuidv4(),
+                name: newName,
+                client,
+                options,
+                createdAt: Date.now(),
+            };
             presets.value.push(preset);
         }
         if (setActive) {

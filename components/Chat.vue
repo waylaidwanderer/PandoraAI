@@ -154,6 +154,7 @@ const sendMessage = async (input) => {
     try {
         await fetchEventSource(`${config.apiBaseUrl}/conversation`, {
             ...opts,
+            openWhenHidden: true,
             signal: processingController.value.signal,
             onopen(response) {
                 if (response.status === 200) {

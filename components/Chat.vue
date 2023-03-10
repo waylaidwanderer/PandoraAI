@@ -8,6 +8,8 @@ import BingIcon from '~/components/Icons/BingIcon.vue';
 import GPTIcon from '~/components/Icons/GPTIcon.vue';
 import ClientDropdown from '~/components/Chat/ClientDropdown.vue';
 import ClientSettings from '~/components/Chat/ClientSettings.vue';
+import { useChatStore } from '~/stores/chat';
+import { storeToRefs } from 'pinia';
 
 marked.setOptions({
     silent: true,
@@ -26,8 +28,14 @@ marked.setOptions({
 });
 
 const config = useRuntimeConfig();
+const chatStore = useChatStore();
+const {
+    clientToUse,
+} = storeToRefs(chatStore);
+const {
+    setClientToUse,
+} = chatStore;
 
-const clientToUse = ref('chatgpt');
 const isClientDropdownOpen = ref(false);
 const isClientSettingsModalOpen = ref(false);
 const clientSettingsModalClient = ref(null);
@@ -237,27 +245,12 @@ const parseMarkdown = (text, streaming = false) => {
     return DOMPurify.sanitize(parsed);
 };
 
-const setClientToUse = (client) => {
-    if (client === clientToUse.value) {
-        return;
-    }
-    clientToUse.value = client;
-    localStorage.setItem('clientToUse', client);
-};
-
 const setIsClientSettingsModalOpen = (isOpen, client = null) => {
     isClientSettingsModalOpen.value = isOpen;
     clientSettingsModalClient.value = client;
 };
 
 if (!process.server) {
-    onBeforeMount(() => {
-        const client = localStorage.getItem('clientToUse');
-        if (client) {
-            setClientToUse(client);
-        }
-    });
-
     onMounted(() => {
         window.addEventListener('resize', setChatContainerHeight);
         setChatContainerHeight();

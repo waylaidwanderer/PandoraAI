@@ -11,7 +11,6 @@ import BingIcon from '~/components/Icons/BingIcon.vue';
 import get from 'lodash/get';
 import set from 'lodash/set';
 import unset from 'lodash/unset';
-import { v4 as uuidv4 } from 'uuid';
 
 const props = defineProps({
     isOpen: {
@@ -115,6 +114,8 @@ const availableOptions = {
     },
 };
 
+const presetStore = usePresetsStore();
+const { addPreset } = presetStore;
 const formClientOptions = ref({});
 
 // computed default saveAsName based on client, using switch
@@ -246,30 +247,7 @@ const resetSaveAsName = () => {
 
 const save = () => {
     console.log(formClientOptions.value);
-    // save to localStorage
-    let currentLocalStoragePresets;
-    try {
-        currentLocalStoragePresets = JSON.parse(localStorage.getItem('presets'));
-    } catch {
-        currentLocalStoragePresets = null;
-    }
-    const newPreset = {
-        id: uuidv4(),
-        name: saveAsName.value,
-        client: props.client,
-        options: formClientOptions.value,
-    };
-    if (currentLocalStoragePresets) {
-        // TODO: pass in ID to update existing preset
-        localStorage.setItem('presets', JSON.stringify([...currentLocalStoragePresets, newPreset]));
-    } else {
-        localStorage.setItem('presets', JSON.stringify([newPreset]));
-    }
-    // if preset name is not default, set as active in localStorage
-    if (saveAsName.value !== defaultSaveAsName.value) {
-        localStorage.setItem('activePreset', JSON.stringify(newPreset));
-    }
-    // TODO: use Vuex to update presets
+    addPreset(saveAsName.value, props.client, formClientOptions.value, saveAsName.value !== defaultSaveAsName.value);
 };
 
 // watch isOpen prop

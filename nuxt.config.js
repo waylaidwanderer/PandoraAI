@@ -1,9 +1,19 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
-import tailwindTypography from '@tailwindcss/typography';
 export default defineNuxtConfig({
+    ssr: false,
+    runtimeConfig: {
+        public: {
+            apiBaseUrl: process.env.API_BASE_URL,
+        },
+    },
+    imports: {
+        dirs: ['stores'],
+    },
     modules: [
         '@nuxtjs/tailwindcss',
         'nuxt-icon',
+        '@pinia/nuxt',
+        '@vueuse/nuxt',
     ],
     css: [
         {
@@ -11,10 +21,7 @@ export default defineNuxtConfig({
             lang: 'css',
         },
     ],
-    runtimeConfig: {
-        public: {
-            apiBaseUrl: process.env.API_BASE_URL,
-        },
+    pinia: {
+        autoImports: ['defineStore', 'acceptHMRUpdate'],
     },
-    ssr: false,
 });

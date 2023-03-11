@@ -314,7 +314,12 @@ watch(() => props.isOpen, (isOpen) => {
 watch(() => props.client, (client) => {
     if (client) {
         resetSaveAsName();
-        formClientOptions.value = getPreset(defaultSaveAsName.value)?.options || {};
+        const preset = getPreset(defaultSaveAsName.value)?.options;
+        if (preset) {
+            formClientOptions.value = JSON.parse(JSON.stringify(preset));
+        } else {
+            formClientOptions.value = {};
+        }
     }
 });
 </script>

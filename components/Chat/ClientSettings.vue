@@ -335,6 +335,13 @@ watch(() => props.client, (client) => {
             <div class="flex min-h-full items-center justify-center p-4">
                 <!-- The actual dialog panel -->
                 <DialogPanel class="w-full max-w-3xl rounded text-slate-300 bg-white/10 backdrop-blur-lg p-6 shadow-lg">
+                    <button
+                        @click="setIsOpen(false)"
+                        class="absolute top-0 right-0 m-2 text-white/60 hover:text-white/80 transition duration-300 ease-in-out"
+                    >
+                        <Icon name="bx:bx-x" class="text-2xl" />
+                    </button>
+
                     <DialogTitle class="font-black text-slate-100 text-2xl flex items-center">
                         <GPTIcon
                             v-if="client === 'chatgpt'"

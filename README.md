@@ -11,10 +11,10 @@ You may also use this with other API server implementations as long as the endpo
 ## Features
 
 - Chat with all the AI that `node-chatgpt-api` supports, including `gpt-3.5-turbo`, `text-davinci-003`, ChatGPT, and Bing.
-- Supports creating multiple presets for each client.
-  - ![Client Settings](demos/client-settings.png) 
-- Choose between different clients or custom presets.
-  - ![Client Dropdown](demos/client-dropdown.png)
+- Supports creating multiple presets for each client.  
+![Client Settings](demos/client-settings.png) 
+- Choose between different clients or custom presets.  
+![Client Dropdown](demos/client-dropdown.png)
 - Everything is stored in local storage, so you can use this client without an account, and it can be imported or exported to other devices.
 
 <details>

@@ -3,6 +3,15 @@
 import 'fork-corner/dist/fork-corner.css';
 import initForkCorner from '~/fork-corner';
 
+useHead({
+    meta: [
+        {
+            name: 'viewport',
+            content: 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no',
+        },
+    ],
+});
+
 onMounted(() => {
     initForkCorner();
 });

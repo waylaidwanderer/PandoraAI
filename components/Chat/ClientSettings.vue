@@ -46,10 +46,12 @@ const availableOptions = {
                 maxContextTokens: {
                     type: 'number',
                     label: 'Max Context Tokens',
+                    min: 1,
                 },
                 maxPromptTokens: {
                     type: 'number',
                     label: 'Max Prompt Tokens',
+                    min: 1,
                 },
                 userLabel: {
                     type: 'text',
@@ -74,31 +76,36 @@ const availableOptions = {
                         temperature: {
                             type: 'range',
                             label: 'Temperature',
-                            range: [0, 2],
+                            min: 0,
+                            max: 2,
                             step: 0.01,
                         },
                         top_p: {
                             type: 'range',
                             label: 'Top P',
-                            range: [0, 1],
+                            min: 0,
+                            max: 2,
                             step: 0.01,
                         },
                         presence_penalty: {
                             type: 'range',
                             label: 'Presence Penalty',
-                            range: [-2, 2],
+                            min: -2,
+                            max: 2,
                             step: 0.01,
                         },
                         frequency_penalty: {
                             type: 'range',
                             label: 'Frequency Penalty',
-                            range: [-2, 2],
+                            min: -2,
+                            max: 2,
                             step: 0.01,
                         },
                         max_tokens: {
                             type: 'range',
                             label: 'Max Tokens',
-                            range: [1, 4096],
+                            min: 1,
+                            max: 4096,
                             step: 1,
                         },
                     },
@@ -242,8 +249,8 @@ const generateForm = (options, parentKey, levels = 0) => {
                         type: option.type,
                         placeholder: 'default server value',
                         value: inputValue,
-                        min: option.range ? option.range[0] : null,
-                        max: option.range ? option.range[1] : null,
+                        min: option.min,
+                        max: option.max,
                         step: option.step || null,
                         onInput: (e) => {
                             let inputValue = e.target.value;
@@ -254,7 +261,7 @@ const generateForm = (options, parentKey, levels = 0) => {
                             if (typeof inputValue === 'string') {
                                 inputValue = inputValue.trim();
                             }
-                            if (option.type === 'text' && !inputValue) {
+                            if (!inputValue) {
                                 unset(formClientOptions.value, optionKey);
                                 return;
                             }

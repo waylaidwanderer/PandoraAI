@@ -1,5 +1,3 @@
-import { v4 as uuidv4 } from 'uuid';
-
 export const usePresetsStore = defineStore('presetsStore', () => {
     const presets = useLocalStorage('presetsStore/presets', []);
     const activePresetName = useLocalStorage('presetsStore/activePresetName', 'chatgpt');

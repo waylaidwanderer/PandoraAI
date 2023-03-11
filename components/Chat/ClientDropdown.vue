@@ -1,8 +1,8 @@
 <script setup>
+import { storeToRefs } from 'pinia';
 import GPTIcon from '~/components/Icons/GPTIcon.vue';
 import BingIcon from '~/components/Icons/BingIcon.vue';
 import { usePresetsStore } from '~/stores/presets';
-import { storeToRefs } from 'pinia';
 
 defineProps({
     presetName: {
@@ -28,24 +28,24 @@ const importAppData = () => {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'application/json';
-    input.onchange = e => {
+    input.onchange = (e) => {
         const file = e.target.files[0];
         const reader = new FileReader();
         reader.readAsText(file, 'UTF-8');
-        reader.onload = readerEvent => {
+        reader.onload = (readerEvent) => {
             const content = readerEvent.target.result;
             localStorage.clear();
             Object.assign(localStorage, JSON.parse(content));
-            location.reload();
+            window.location.reload();
         };
     };
     input.click();
-}
+};
 
 const exportAppData = () => {
     // turn localStorage into JSON and save it as a file
     const dataStr = JSON.stringify(localStorage);
-    const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+    const dataUri = `data:application/json;charset=utf-8,${encodeURIComponent(dataStr)}`;
 
     const exportFileDefaultName = 'appData.json';
 
@@ -127,6 +127,7 @@ const exportAppData = () => {
             </div>
             <div
                 v-for="preset in customPresets"
+                :key="preset.name"
                 class="w-full flex flex-row"
             >
                 <button

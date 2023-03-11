@@ -4,11 +4,11 @@ import { marked } from 'marked';
 import DOMPurify from 'isomorphic-dompurify';
 import hljs from 'highlight.js';
 import { v4 as uuidv4 } from 'uuid';
+import { storeToRefs } from 'pinia';
 import BingIcon from '~/components/Icons/BingIcon.vue';
 import GPTIcon from '~/components/Icons/GPTIcon.vue';
 import ClientDropdown from '~/components/Chat/ClientDropdown.vue';
 import ClientSettings from '~/components/Chat/ClientSettings.vue';
-import { storeToRefs } from 'pinia';
 
 marked.setOptions({
     silent: true,
@@ -58,13 +58,6 @@ const canChangePreset = computed(() => !processingController.value && Object.key
 const inputRows = computed(() => {
     const newlines = (message.value.match(/\n/g) || []).length;
     return Math.min(newlines + 1, 7);
-});
-
-// watch inputRows for change and call `setChatContainerHeight` to adjust height
-watch(inputRows, () => {
-    nextTick(() => {
-        setChatContainerHeight();
-    });
 });
 
 const scrollToBottom = () => {
@@ -163,18 +156,18 @@ const sendMessage = async (input) => {
                 throw new Error(`Failed to send message. HTTP ${response.status} - ${response.statusText}`);
             },
             onclose() {
-                throw new Error(`Failed to send message. Server closed the connection unexpectedly.`);
+                throw new Error('Failed to send message. Server closed the connection unexpectedly.');
             },
             onerror(err) {
                 throw err;
             },
-            onmessage(message) {
-                if (message.data === '[DONE]') {
+            onmessage(eventMessage) {
+                if (eventMessage.data === '[DONE]') {
                     processingController.value.abort();
                     return;
                 }
-                if (message.event === 'result') {
-                    const result = JSON.parse(message.data);
+                if (eventMessage.event === 'result') {
+                    const result = JSON.parse(eventMessage.data);
                     if (result.jailbreakConversationId) {
                         conversationData.value = {
                             jailbreakConversationId: result.jailbreakConversationId,
@@ -208,15 +201,15 @@ const sendMessage = async (input) => {
                     nextTick().then(() => scrollToBottom());
                     return;
                 }
-                if (message.event === 'error') {
-                    const data = JSON.parse(message.data);
-                    botMessage.text = data.error || 'An error occurred. Please try again.';
+                if (eventMessage.event === 'error') {
+                    const eventMessageData = JSON.parse(eventMessage.data);
+                    botMessage.text = eventMessageData.error || 'An error occurred. Please try again.';
                     botMessage.error = true;
-                    botMessage.raw = data;
+                    botMessage.raw = eventMessageData;
                     nextTick().then(() => scrollToBottom());
                     return;
                 }
-                botMessage.text += JSON.parse(message.data);
+                botMessage.text += JSON.parse(eventMessage.data);
                 nextTick().then(() => scrollToBottom());
             },
         });
@@ -237,7 +230,10 @@ const setChatContainerHeight = () => {
     const footerElementHeight = document.querySelector('footer').offsetHeight;
     const inputContainerElementHeight = inputContainerElement.value.offsetHeight;
     const heightOffset = window.document.documentElement.clientHeight - window.innerHeight + 50;
-    const containerHeight = window.document.documentElement.clientHeight - (headerElementHeight + footerElementHeight) - inputContainerElementHeight - (heightOffset / 2);
+    const containerHeight = window.document.documentElement.clientHeight
+        - (headerElementHeight + footerElementHeight)
+        - inputContainerElementHeight
+        - (heightOffset / 2);
     // set container height
     messagesContainerElement.value.style.height = `${containerHeight}px`;
     // move input container element bottom down
@@ -294,6 +290,13 @@ if (!process.server) {
     onUnmounted(() => {
         window.removeEventListener('resize', setChatContainerHeight);
         stopProcessing();
+    });
+
+    // watch inputRows for change and call `setChatContainerHeight` to adjust height
+    watch(inputRows, () => {
+        nextTick(() => {
+            setChatContainerHeight();
+        });
     });
 }
 </script>
@@ -359,7 +362,10 @@ if (!process.server) {
                     <button
                         v-if="processingController"
                         @click="stopProcessing"
-                        class="flex-1 py-2 px-5 bg-white/10 backdrop-blur-sm text-slate-300 text-sm shadow rounded transition duration-300 ease-in-out hover:bg-white/20"
+                        class="
+                            flex-1 py-2 px-5 bg-white/10 backdrop-blur-sm text-slate-300 text-sm
+                            shadow rounded transition duration-300 ease-in-out hover:bg-white/20
+                        "
                     >
                         Stop
                     </button>
@@ -367,7 +373,10 @@ if (!process.server) {
                         v-for="response in suggestedResponses"
                         :key="response"
                         @click="sendMessage(response)"
-                        class="flex-1 py-2 px-3 bg-white/10 backdrop-blur-sm text-slate-300 text-sm shadow rounded transition duration-300 ease-in-out hover:bg-white/20"
+                        class="
+                            flex-1 py-2 px-3 bg-white/10 backdrop-blur-sm text-slate-300 text-sm
+                            shadow rounded transition duration-300 ease-in-out hover:bg-white/20
+                        "
                     >
                         {{ response }}
                     </button>
@@ -425,7 +434,10 @@ if (!process.server) {
                     @keydown.enter.exact.prevent="sendMessage(message)"
                     placeholder="Type your message here..."
                     :disabled="!!processingController"
-                    class="py-4 pl-14 pr-14 rounded-l-sm text-slate-100 w-full bg-white/5 backdrop-blur-sm placeholder-white/40 focus:outline-none resize-none placeholder:truncate"
+                    class="
+                        py-4 pl-14 pr-14 rounded-l-sm text-slate-100 w-full bg-white/5 backdrop-blur-sm
+                        placeholder-white/40 focus:outline-none resize-none placeholder:truncate
+                    "
                     :class="{
                         'opacity-50 cursor-not-allowed': !!processingController,
                     }"

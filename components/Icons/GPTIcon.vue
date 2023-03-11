@@ -1,3 +1,7 @@
+<script>
+/* eslint-disable max-len */
+</script>
+
 <template>
     <svg
         fill="none"

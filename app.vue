@@ -7,7 +7,12 @@
             <Chat/>
         </main>
         <footer class="px-3 py-6 text-center">
-            <span class="text-xs font-light text-slate-400">powered by <a href="https://github.com/waylaidwanderer/node-chatgpt-api" target="_blank">https://github.com/waylaidwanderer/node-chatgpt-api</a></span>
+            <span class="text-xs font-light text-slate-400">
+                powered by
+                <a href="https://github.com/waylaidwanderer/node-chatgpt-api" target="_blank">
+                    https://github.com/waylaidwanderer/node-chatgpt-api
+                </a>
+            </span>
         </footer>
     </div>
 </template>

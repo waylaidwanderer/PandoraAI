@@ -6,11 +6,11 @@ import {
     DialogPanel,
     Switch,
 } from '@headlessui/vue';
-import GPTIcon from '~/components/Icons/GPTIcon.vue';
-import BingIcon from '~/components/Icons/BingIcon.vue';
 import get from 'lodash/get';
 import set from 'lodash/set';
 import unset from 'lodash/unset';
+import BingIcon from '~/components/Icons/BingIcon.vue';
+import GPTIcon from '~/components/Icons/GPTIcon.vue';
 
 const props = defineProps({
     isOpen: {
@@ -110,7 +110,7 @@ const availableOptions = {
                         },
                     },
                 },
-            }
+            },
         },
     },
     'chatgpt-browser': {
@@ -188,107 +188,106 @@ const saveAsName = ref(defaultSaveAsName.value);
 const formClientOptions = ref({});
 
 // Recursive form generation component
-const generateForm = (options, parentKey, levels = 0) => {
-    return Object.entries(options).map(([key, value]) => {
-        const option = options[key];
-        let optionKey;
-        if (key === '0') {
-            optionKey = parentKey;
-        } else {
-            optionKey = `${parentKey}.${key}`;
-        }
-        if (option.type === 'nested') {
-            return h('div', { class: 'flex flex-col gap-2', style: `margin-left: ${levels}em;` }, [
-                h('label', { class: 'text-white/80 font-bold' }, option.label),
-                ...generateForm(option.properties, optionKey, levels + 1),
+const generateForm = (options, parentKey, levels = 0) => Object.entries(options).map(([key]) => {
+    const option = options[key];
+    let optionKey;
+    if (key === '0') {
+        optionKey = parentKey;
+    } else {
+        optionKey = `${parentKey}.${key}`;
+    }
+    if (option.type === 'nested') {
+        return h('div', { class: 'flex flex-col gap-2', style: `margin-left: ${levels}em;` }, [
+            h('label', { class: 'text-white/80 font-bold' }, option.label),
+            ...generateForm(option.properties, optionKey, levels + 1),
+        ]);
+    }
+    // other types like text, range, checkbox etc.
+    let classList = 'w-full placeholder-white/40 text-slate-300 text-sm rounded py-2 focus:outline-none';
+    switch (option.type) {
+        case 'range':
+            classList = `${classList} bg-transparent`;
+            break;
+        default:
+            classList = `${classList} shadow-inner bg-white/5 px-3`;
+            break;
+    }
+    const inputValue = get(formClientOptions.value, optionKey);
+    let inputElement;
+    switch (option.type) {
+        case 'textarea':
+            inputElement = h('textarea', {
+                placeholder: 'default server value',
+                value: inputValue,
+                onInput: (e) => {
+                    const trimmedInputValue = e.target.value.trim();
+                    if (!trimmedInputValue) {
+                        unset(formClientOptions.value, optionKey);
+                    } else {
+                        set(formClientOptions.value, optionKey, trimmedInputValue);
+                    }
+                },
+                class: classList,
+            });
+            break;
+        case 'checkbox':
+            inputElement = h(Switch, {
+                modelValue: inputValue || false,
+                'onUpdate:modelValue': (checked) => {
+                    set(formClientOptions.value, optionKey, checked);
+                },
+                class: `relative inline-flex h-6 w-11 items-center rounded-full transition ${inputValue ? 'bg-white/50' : 'bg-white/10'}`,
+            }, () => [
+                h('span', { class: 'sr-only' }, option.label),
+                h('span', {
+                    class: `inline-block h-4 w-4 transform rounded-full bg-white transition ${inputValue ? 'translate-x-6' : 'translate-x-1'}`,
+                }),
             ]);
-        } else { // other types like text, range, checkbox etc.
-            let classList = 'w-full placeholder-white/40 text-slate-300 text-sm rounded py-2 focus:outline-none';
-            switch (option.type) {
-                case 'range':
-                    classList = `${classList} bg-transparent`;
-                    break;
-                default:
-                    classList = `${classList} shadow-inner bg-white/5 px-3`;
-                    break;
-            }
-            const inputValue = get(formClientOptions.value, optionKey);
-            let inputElement;
-            switch (option.type) {
-                case 'textarea':
-                    inputElement = h('textarea', {
-                        placeholder: 'default server value',
-                        value: inputValue,
-                        onInput: (e) => {
-                            const inputValue = e.target.value.trim();
-                            if (!inputValue) {
-                                unset(formClientOptions.value, optionKey);
-                            } else {
-                                set(formClientOptions.value, optionKey, inputValue);
-                            }
-                        },
-                        class: classList,
-                    });
-                    break;
-                case 'checkbox':
-                    inputElement = h(Switch, {
-                        modelValue: inputValue || false,
-                        'onUpdate:modelValue': (checked) => {
-                            set(formClientOptions.value, optionKey, checked);
-                        },
-                        class: `relative inline-flex h-6 w-11 items-center rounded-full transition ${inputValue ? 'bg-white/50' : 'bg-white/10'}`,
-                    }, () => [
-                        h('span', { class: 'sr-only' }, option.label),
-                        h('span', {
-                            class: `inline-block h-4 w-4 transform rounded-full bg-white transition ${inputValue ? 'translate-x-6' : 'translate-x-1'}`,
-                        }),
-                    ]);
-                    break;
-                default:
-                    inputElement = h('input', {
-                        type: option.type,
-                        placeholder: 'default server value',
-                        value: inputValue,
-                        min: option.min,
-                        max: option.max,
-                        step: option.step || null,
-                        onInput: (e) => {
-                            let inputValue = e.target.value;
-                            if (typeof inputValue === 'undefined') {
-                                unset(formClientOptions.value, optionKey);
-                                return;
-                            }
-                            if (typeof inputValue === 'string') {
-                                inputValue = inputValue.trim();
-                            }
-                            if (!inputValue) {
-                                unset(formClientOptions.value, optionKey);
-                                return;
-                            }
-                            if (option.type === 'number' || option.type === 'range') {
-                                inputValue = Number(inputValue);
-                            } else if (option.type === 'checkbox') {
-                                inputValue = e.target.checked;
-                            }
-                            set(formClientOptions.value, optionKey, inputValue);
-                        },
-                        class: classList,
-                    });
-                    break;
-            }
+            break;
+        default:
+            inputElement = h('input', {
+                type: option.type,
+                placeholder: 'default server value',
+                value: inputValue,
+                min: option.min,
+                max: option.max,
+                step: option.step || null,
+                onInput: (e) => {
+                    let eventInputValue = e.target.value;
+                    if (typeof eventInputValue === 'undefined') {
+                        unset(formClientOptions.value, optionKey);
+                        return;
+                    }
+                    if (typeof eventInputValue === 'string') {
+                        eventInputValue = eventInputValue.trim();
+                    }
+                    if (!eventInputValue) {
+                        unset(formClientOptions.value, optionKey);
+                        return;
+                    }
+                    if (option.type === 'number' || option.type === 'range') {
+                        eventInputValue = Number(eventInputValue);
+                    } else if (option.type === 'checkbox') {
+                        eventInputValue = e.target.checked;
+                    }
+                    set(formClientOptions.value, optionKey, eventInputValue);
+                },
+                class: classList,
+            });
+            break;
+    }
 
-            return h('div', {
-                class: 'flex flex-col gap-2',
-            }, [
-                h('label',
-                    { class: 'text-white/60 text-xs' },
-                    option.type === 'range' ? `${option.label}: ${typeof inputValue === 'undefined' ? 'default server value' : inputValue}` : option.label,
-                ),
-                inputElement,
-            ]);
-        }
-    });
-};
+    return h('div', {
+        class: 'flex flex-col gap-2',
+    }, [
+        h(
+            'label',
+            { class: 'text-white/60 text-xs' },
+            option.type === 'range' ? `${option.label}: ${typeof inputValue === 'undefined' ? 'default server value' : inputValue}` : option.label,
+        ),
+        inputElement,
+    ]);
+});
 
 const resetSaveAsName = () => {
     saveAsName.value = defaultSaveAsName.value;
@@ -367,7 +366,10 @@ watch(() => props.client, (client) => {
                                         <button
                                             v-if="saveAsName === defaultSaveAsName"
                                             type="button"
-                                            class="flex items-center px-2 rounded bg-red-500/50 text-white/70 hover:text-white/90 hover:bg-red-500/60 transition duration-300"
+                                            class="
+                                                flex items-center px-2 rounded bg-red-500/50 text-white/70
+                                                hover:text-white/90 hover:bg-red-500/60 transition duration-300
+                                            "
                                             @click="deletePresetHandler"
                                         >
                                             <Icon name="bx:bx-trash" />

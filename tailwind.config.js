@@ -2,6 +2,7 @@
 module.exports = {
     content: [],
     plugins: [
+        // eslint-disable-next-line global-require,import/no-extraneous-dependencies
         require('@tailwindcss/typography'),
     ],
     theme: {

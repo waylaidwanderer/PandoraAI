@@ -1,4 +1,21 @@
+<script setup>
+// eslint-disable-next-line import/no-extraneous-dependencies
+import 'fork-corner/dist/fork-corner.css';
+import initForkCorner from '~/fork-corner';
+
+onMounted(() => {
+    initForkCorner();
+});
+</script>
+
 <template>
+    <a
+        href="https://github.com/waylaidwanderer/chatgpt-web-client"
+        target="_blank"
+        id="fork-corner"
+        class="fork-corner fc-size-small fc-pos-tr fc-animate fc-theme-github"
+        title="Fork me on GitHub"
+    ></a>
     <div class="flex flex-col min-h-screen text-slate-300">
         <header class="px-3 py-6 text-center">
             <h1 class="text-3xl font-black text-white/80 drop-shadow-md">ChatGPT Web Client</h1>
@@ -45,5 +62,13 @@ footer a {
     background: linear-gradient(to right, #37feff 0%, #bd7bff 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+}
+
+.fork-corner.fc-theme-github + div {
+    @apply shadow bg-black/50;
+}
+
+.fork-corner.fc-theme-github > i {
+    @apply text-white/80;
 }
 </style>

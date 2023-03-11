@@ -365,14 +365,14 @@ watch(() => props.client, (client) => {
                                     </template>
                                 </div>
 
-                                <div class="flex justify-end mt-4 gap-2">
+                                <div class="flex flex-col sm:flex-row justify-end mt-4 gap-2">
                                     <!-- Delete button -->
                                     <Transition name="fade">
                                         <button
                                             v-if="saveAsName === defaultSaveAsName"
                                             type="button"
                                             class="
-                                                flex items-center px-2 rounded bg-red-500/50 text-white/70
+                                                flex items-center justify-center px-2 py-2 rounded bg-red-500/50 text-white/70
                                                 hover:text-white/90 hover:bg-red-500/60 transition duration-300
                                             "
                                             @click="deletePresetHandler"
@@ -381,18 +381,26 @@ watch(() => props.client, (client) => {
                                         </button>
                                     </Transition>
                                     <!-- Save as Name input -->
-                                    <div class="relative flex items-stretch shadow-inner bg-white/5 rounded">
-                                        <label class="text-white/60 text-xs h-full flex items-center px-3 border-r border-white/5">
+                                    <div class="relative flex flex-col sm:flex-row items-stretch shadow-inner bg-white/5 rounded">
+                                        <label
+                                            class="
+                                                text-white/60 text-xs h-full flex items-center px-3 py-2 border-white/5
+                                                border-b sm:border-r sm:border-b-0
+                                            "
+                                        >
                                             Preset Name
                                         </label>
                                         <input
                                             type="text"
-                                            class="placeholder-white/40 bg-transparent text-slate-300 text-sm py-2 focus:outline-none pl-3"
+                                            class="placeholder-white/40 bg-transparent text-slate-300 text-sm py-2 focus:outline-none pl-3 flex-1"
                                             placeholder="Preset Name"
                                             v-model="saveAsName"
                                         />
                                         <button
-                                            class="flex items-center px-3 group"
+                                            class="
+                                                flex items-center justify-center px-3 py-2 group
+                                                bg-white/5 sm:bg-transparent
+                                            "
                                             @click="resetSaveAsName"
                                         >
                                             <Icon name="bx:bx-reset" class="text-white/70 group-hover:text-white/90 transition" />
@@ -401,7 +409,7 @@ watch(() => props.client, (client) => {
                                     <button
                                         type="button"
                                         class="
-                                            flex items-center gap-1
+                                            flex items-center justify-center gap-1 py-2
                                             text-slate-300 rounded bg-white/10
                                             transition duration-300 ease-in-out
                                             hover:bg-white/20

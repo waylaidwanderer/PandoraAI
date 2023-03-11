@@ -73,8 +73,12 @@ footer a {
     -webkit-text-fill-color: transparent;
 }
 
+#fork-corner {
+    z-index: 41;
+}
+
 .fork-corner.fc-theme-github + div {
-    @apply shadow bg-black/50;
+    @apply shadow bg-black/50 z-40;
 }
 
 .fork-corner.fc-theme-github > i {

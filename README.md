@@ -1,5 +1,5 @@
 <p align="center">
-  <img alt="Web client demo" src="./demos/client.png">
+  <img alt="Web client demo" src="./demos/client.png?v=1">
 </p>
 
 # ChatGPT Web Client

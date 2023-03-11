@@ -2,11 +2,12 @@
   <img alt="Web client demo" src="./demos/client.png?v=1">
 </p>
 
-# ChatGPT Web Client
+# PandoraAI
 
-This is a web client for [waylaidwanderer/node-chatgpt-api](https://github.com/waylaidwanderer/node-chatgpt-api)'s API server, built using [Nuxt 3](https://v3.nuxtjs.org/), a Vue 3 framework.
+PandoraAI is a web chat client powered by [node-chatgpt-api](https://github.com/waylaidwanderer/node-chatgpt-api), allowing users to easily chat with multiple AI systems while also offering support for custom presets. With its seamless and convenient design, PandoraAI provides an engaging conversational AI experience.
 
-You may also use this with other API server implementations as long as the endpoints are compatible.
+Built using [Nuxt 3](https://v3.nuxtjs.org/), a Vue 3 framework.  
+You may also use PandoraAI with other API server implementations as long as the endpoints are compatible.
 
 ## Features
 
@@ -65,7 +66,7 @@ Check out the [deployment documentation](https://nuxt.com/docs/getting-started/d
 ## Setup
 
 1. Follow the Nuxt 3 setup instructions above.
-2. Run the API server from [waylaidwanderer/node-chatgpt-api](https://github.com/waylaidwanderer/node-chatgpt-api#api-server).
+2. Run the API server from [node-chatgpt-api](https://github.com/waylaidwanderer/node-chatgpt-api#api-server).
 3. Copy `.env.example` to `.env` and fill in the `API_BASE_URL` variable with the URL of the API server.
 4. Run `npm run dev` to start the development server, or `npm run build` to build the application for production.
 

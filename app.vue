@@ -26,8 +26,8 @@ onMounted(() => {
         title="Fork me on GitHub"
     ></a>
     <div class="flex flex-col min-h-screen text-slate-300">
-        <header class="px-3 py-6 text-center">
-            <h1 class="text-3xl font-black text-white/80 drop-shadow-md">ChatGPT Web Client</h1>
+        <header class="px-3 py-6 text-center bg-white/10 backdrop-blur shadow">
+            <h1 class="text-2xl font-bold text-white/80 drop-shadow-md">Pandora<span class="font-light">AI</span></h1>
         </header>
         <main class="flex flex-grow py-2">
             <Chat/>

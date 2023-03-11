@@ -328,7 +328,15 @@ if (!process.server) {
                         <div
                             class="text-xs text-white/50 mb-1"
                         >
-                            {{ message.role }}
+                            <template v-if="message.role === 'bot'">
+                                {{ activePreset?.options?.clientOptions?.chatGptLabel || 'AI' }}
+                            </template>
+                            <template v-else-if="message.role === 'user'">
+                                {{ activePreset?.options?.clientOptions?.userLabel || 'User' }}
+                            </template>
+                            <template v-else>
+                                {{ message.role }}
+                            </template>
                         </div>
                         <!-- message text -->
                         <div

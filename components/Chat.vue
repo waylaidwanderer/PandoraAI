@@ -4,6 +4,11 @@ import { marked } from 'marked';
 import DOMPurify from 'isomorphic-dompurify';
 import hljs from 'highlight.js';
 import { v4 as uuidv4 } from 'uuid';
+import BingIcon from '~/components/Icons/BingIcon.vue';
+import GPTIcon from '~/components/Icons/GPTIcon.vue';
+import ClientDropdown from '~/components/Chat/ClientDropdown.vue';
+import ClientSettings from '~/components/Chat/ClientSettings.vue';
+import { storeToRefs } from 'pinia';
 
 marked.setOptions({
     silent: true,
@@ -23,6 +28,20 @@ marked.setOptions({
 
 const config = useRuntimeConfig();
 
+const presetsStore = usePresetsStore();
+const {
+    activePresetName,
+    activePreset,
+} = storeToRefs(presetsStore);
+const {
+    setActivePresetName,
+} = presetsStore;
+
+const isClientDropdownOpen = ref(false);
+const isClientSettingsModalOpen = ref(false);
+const clientSettingsModalClient = ref(null);
+const clientSettingsModalPresetName = ref(null);
+
 const messages = ref([]);
 const message = ref('');
 const processingController = ref(null);
@@ -32,6 +51,21 @@ const conversationData = ref({});
 const messagesContainerElement = ref(null);
 const inputContainerElement = ref(null);
 const inputTextElement = ref(null);
+
+const canChangePreset = computed(() => !processingController.value && Object.keys(conversationData.value).length === 0);
+
+// compute number of rows for textarea based on message newlines, up to 7
+const inputRows = computed(() => {
+    const newlines = (message.value.match(/\n/g) || []).length;
+    return Math.min(newlines + 1, 7);
+});
+
+// watch inputRows for change and call `setChatContainerHeight` to adjust height
+watch(inputRows, () => {
+    nextTick(() => {
+        setChatContainerHeight();
+    });
+});
 
 const scrollToBottom = () => {
     messagesContainerElement.value.scrollTop = messagesContainerElement.value.scrollHeight;
@@ -54,6 +88,8 @@ const sendMessage = async (input) => {
     if (!input) {
         return;
     }
+
+    isClientDropdownOpen.value = false;
 
     suggestedResponses.value = [];
     processingController.value = new AbortController();
@@ -79,31 +115,54 @@ const sendMessage = async (input) => {
 
     const botMessage = messages.value[messages.value.length - 1];
 
+    let clientOptions;
+    if (activePreset.value?.options.clientOptions) {
+        clientOptions = {
+            ...activePreset.value?.options.clientOptions,
+            clientToUse: activePreset.value?.client,
+        };
+    } else {
+        clientOptions = {
+            clientToUse: activePresetName.value,
+        };
+    }
+
+    const data = {
+        ...conversationData.value,
+        message: input,
+        stream: true,
+        clientOptions,
+    };
+
+    if (
+        activePreset.value
+        && activePreset.value.client === 'bing'
+        && activePreset.value.options.jailbreakMode
+        && !conversationData.value.jailbreakConversationId
+    ) {
+        data.jailbreakConversationId = true;
+    }
+
     const opts = {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-            ...conversationData.value,
-            message: input,
-            stream: true,
-        }),
+        body: JSON.stringify(data),
     };
 
     try {
         await fetchEventSource(`${config.apiBaseUrl}/conversation`, {
             ...opts,
+            openWhenHidden: true,
             signal: processingController.value.signal,
             onopen(response) {
-                console.log('opened', response);
                 if (response.status === 200) {
                     return;
                 }
                 throw new Error(`Failed to send message. HTTP ${response.status} - ${response.statusText}`);
             },
             onclose() {
-                console.log('closed');
                 throw new Error(`Failed to send message. Server closed the connection unexpectedly.`);
             },
             onerror(err) {
@@ -116,7 +175,12 @@ const sendMessage = async (input) => {
                 }
                 if (message.event === 'result') {
                     const result = JSON.parse(message.data);
-                    if (result.conversationSignature) {
+                    if (result.jailbreakConversationId) {
+                        conversationData.value = {
+                            jailbreakConversationId: result.jailbreakConversationId,
+                            parentMessageId: result.messageId,
+                        };
+                    } else if (result.conversationSignature) {
                         conversationData.value = {
                             conversationId: result.conversationId,
                             conversationSignature: result.conversationSignature,
@@ -157,7 +221,7 @@ const sendMessage = async (input) => {
             },
         });
     } catch (err) {
-        console.log('ERROR', err);
+        console.error('ERROR', err);
     } finally {
         if (!processingController.value.signal.aborted) {
             processingController.value.abort();
@@ -215,6 +279,12 @@ const parseMarkdown = (text, streaming = false) => {
     return DOMPurify.sanitize(parsed);
 };
 
+const setIsClientSettingsModalOpen = (isOpen, client = null, presetName = null) => {
+    isClientSettingsModalOpen.value = isOpen;
+    clientSettingsModalClient.value = client;
+    clientSettingsModalPresetName.value = presetName || client;
+};
+
 if (!process.server) {
     onMounted(() => {
         window.addEventListener('resize', setChatContainerHeight);
@@ -229,10 +299,18 @@ if (!process.server) {
 </script>
 
 <template>
+    <client-only>
+        <ClientSettings
+            :is-open="isClientSettingsModalOpen"
+            :set-is-open="setIsClientSettingsModalOpen"
+            :client="clientSettingsModalClient"
+            :preset-name="clientSettingsModalPresetName"
+        />
+    </client-only>
     <div class="flex flex-col flex-grow items-center">
         <div
             ref="messagesContainerElement"
-            class="overflow-y-auto w-full rounded-sm pb-12"
+            class="overflow-y-auto w-full rounded-sm pb-12 px-3 lg:px-0"
         >
             <TransitionGroup name="messages">
                 <div
@@ -250,7 +328,15 @@ if (!process.server) {
                         <div
                             class="text-xs text-white/50 mb-1"
                         >
-                            {{ message.role }}
+                            <template v-if="message.role === 'bot'">
+                                {{ activePreset?.options?.clientOptions?.chatGptLabel || 'AI' }}
+                            </template>
+                            <template v-else-if="message.role === 'user'">
+                                {{ activePreset?.options?.clientOptions?.userLabel || 'User' }}
+                            </template>
+                            <template v-else>
+                                {{ message.role }}
+                            </template>
                         </div>
                         <!-- message text -->
                         <div
@@ -263,9 +349,9 @@ if (!process.server) {
         </div>
         <div
             ref="inputContainerElement"
-            class="w-full mx-auto max-w-4xl px-3 lg:px-0 flex flex-row absolute left-0 right-0 h-[67px] z-10"
+            class="mx-auto w-full max-w-4xl px-3 lg:px-0 flex flex-row absolute left-0 right-0 mb-7 sm:mb-0 z-10"
         >
-            <div class="relative flex flex-row w-full justify-center">
+            <div class="relative flex flex-row w-full justify-center items-stretch rounded shadow">
                 <div
                     class="flex gap-2 mb-3 items-stretch justify-center absolute bottom-full"
                     :class="{ 'w-full': !processingController }"
@@ -286,14 +372,60 @@ if (!process.server) {
                         {{ response }}
                     </button>
                 </div>
+                <Transition name="slide-from-bottom">
+                    <ClientDropdown
+                        v-if="isClientDropdownOpen"
+                        :preset-name="activePresetName"
+                        :set-client-to-use="setActivePresetName"
+                        :set-is-client-settings-modal-open="setIsClientSettingsModalOpen"
+                    />
+                </Transition>
+                <button
+                    @click="isClientDropdownOpen = !isClientDropdownOpen"
+                    class="flex items-center w-10 h-10 my-auto ml-2 justify-center absolute left-0 top-0 bottom-0 z-10"
+                    :disabled="!canChangePreset"
+                >
+                    <Transition name="fade" mode="out-in">
+                        <GPTIcon
+                            v-if="activePresetName === 'chatgpt' || activePreset?.client === 'chatgpt'"
+                            class="w-10 h-10 p-2 block transition duration-300 ease-in-out rounded-lg"
+                            :class="{
+                                'opacity-50 cursor-not-allowed': !!processingController,
+                                'opacity-80': !canChangePreset,
+                                'hover:bg-black/30 cursor-pointer hover:shadow': canChangePreset,
+                                'bg-black/30 shadow': isClientDropdownOpen,
+                            }"
+                        />
+                        <GPTIcon
+                            v-else-if="activePresetName === 'chatgpt-browser' || activePreset?.client === 'chatgpt-browser'"
+                            class="w-10 h-10 p-2 text-[#6ea194] block transition duration-300 ease-in-out rounded-lg"
+                            :class="{
+                                'opacity-50 cursor-not-allowed': !!processingController,
+                                'opacity-80': !canChangePreset,
+                                'hover:bg-black/30 cursor-pointer hover:shadow': canChangePreset,
+                                'bg-black/30 shadow': isClientDropdownOpen,
+                            }"
+                        />
+                        <BingIcon
+                            v-else-if="activePresetName === 'bing' || activePreset?.client === 'bing'"
+                            class="w-10 h-10 p-2 block transition duration-300 ease-in-out rounded-lg"
+                            :class="{
+                                'opacity-50 cursor-not-allowed': !!processingController,
+                                'opacity-80': !canChangePreset,
+                                'hover:bg-black/30 cursor-pointer hover:shadow': canChangePreset,
+                                'bg-black/30 shadow': isClientDropdownOpen,
+                            }"
+                        />
+                    </Transition>
+                </button>
                 <textarea
                     ref="inputTextElement"
-                    rows="1"
+                    :rows="inputRows"
                     v-model="message"
                     @keydown.enter.exact.prevent="sendMessage(message)"
                     placeholder="Type your message here..."
                     :disabled="!!processingController"
-                    class="p-3 rounded-sm text-slate-100 w-full bg-white/5 backdrop-blur-sm placeholder-white/40 shadow-inner shadow focus:outline-none"
+                    class="py-4 pl-14 pr-14 rounded-l-sm text-slate-100 w-full bg-white/5 backdrop-blur-sm placeholder-white/40 focus:outline-none resize-none placeholder:truncate"
                     :class="{
                         'opacity-50 cursor-not-allowed': !!processingController,
                     }"
@@ -301,13 +433,17 @@ if (!process.server) {
                 <button
                     @click="sendMessage(message)"
                     :disabled="!!processingController"
-                    class="py-3 px-7 bg-white/10 backdrop-blur-sm text-slate-300 shadow rounded-sm ml-3 transition duration-300 ease-in-out"
+                    class="
+                        flex items-center flex-1
+                        px-4 text-slate-300 rounded-r-sm bg-white/5 backdrop-blur-sm
+                        transition duration-300 ease-in-out
+                    "
                     :class="{
                         'opacity-50 cursor-not-allowed': !!processingController,
-                        'hover:bg-white/20': !processingController,
+                        'hover:bg-white/10 hover:backdrop-blur-sm': !processingController,
                     }"
                 >
-                    Send
+                    <Icon class="w-5 h-5" name="bx:bxs-send" />
                 </button>
             </div>
         </div>
@@ -319,16 +455,33 @@ if (!process.server) {
 .messages-enter-active {
     transition: all 0.3s ease;
 }
-
 .messages-enter-from {
     opacity: 0;
     transform: translateY(0);
 }
-
 /* ensure leaving items are taken out of layout flow so that moving
    animations can be calculated correctly. */
 .messages-leave-active {
     position: absolute;
+    opacity: 0;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.15s ease-in-out;
+}
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0;
+}
+
+.slide-from-bottom-enter-active,
+.slide-from-bottom-leave-active{
+    transition: all 0.3s ease;
+}
+.slide-from-bottom-enter-from,
+.slide-from-bottom-leave-to {
+    transform: translateY(30px);
     opacity: 0;
 }
 
@@ -347,5 +500,30 @@ if (!process.server) {
 
 .prose p {
     word-break: break-word;
+}
+
+/* Getting rid of the main default styling of the range input */
+input[type="range"] {
+    -webkit-appearance: none;
+}
+
+input[type="range"]:focus {
+    outline: none;
+}
+
+/* Styling the track */
+input[type="range"]::-webkit-slider-runnable-track,
+input[type="range"]::-moz-range-track {
+    @apply h-1 bg-white/10 rounded;
+}
+
+/* Styling the thumb */
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    @apply w-4 h-4 bg-slate-300 rounded-full;
+}
+
+input[type="range"]::-moz-range-thumb {
+    @apply w-4 h-4 bg-slate-300 rounded-full;
 }
 </style>

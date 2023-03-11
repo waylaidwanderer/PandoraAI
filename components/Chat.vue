@@ -524,15 +524,17 @@ input[type="range"]:focus {
 }
 
 /* Styling the track */
-input[type="range"]::-webkit-slider-runnable-track,
+input[type="range"]::-webkit-slider-runnable-track {
+    @apply h-1 bg-white/10 rounded w-full;
+}
 input[type="range"]::-moz-range-track {
-    @apply h-1 bg-white/10 rounded;
+    @apply h-1 bg-white/10 rounded w-full;
 }
 
 /* Styling the thumb */
 input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none;
-    @apply w-4 h-4 bg-slate-300 rounded-full;
+    @apply w-4 h-4 bg-slate-300 rounded-full -m-[0.5em];
 }
 
 input[type="range"]::-moz-range-thumb {

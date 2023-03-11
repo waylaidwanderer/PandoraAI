@@ -4,7 +4,7 @@ import {
     DialogTitle,
     DialogDescription,
     DialogPanel,
-    Switch,
+    Switch, TransitionRoot,
 } from '@headlessui/vue';
 import get from 'lodash/get';
 import set from 'lodash/set';
@@ -325,105 +325,100 @@ watch(() => props.client, (client) => {
 </script>
 
 <template>
-    <Dialog :open="true" @close="setIsOpen(false)" class="relative z-50">
-        <!-- This is a hack because TransitionRoot does not work on enter properly  -->
-        <transition name="fade">
-            <div v-if="isOpen">
-                <!-- The backdrop, rendered as a fixed sibling to the panel container -->
-                <div class="fixed inset-0 bg-black/30" aria-hidden="true" />
+    <Dialog :open="isOpen" @close="setIsOpen(false)" class="relative z-50">
+        <!-- The backdrop, rendered as a fixed sibling to the panel container -->
+        <div class="fixed inset-0 bg-black/30" aria-hidden="true" />
 
-                <!-- Full-screen scrollable container -->
-                <div class="fixed inset-0 overflow-y-auto">
-                    <!-- Container to center the panel -->
-                    <div class="flex min-h-full items-center justify-center p-4">
-                        <!-- The actual dialog panel -->
-                        <DialogPanel class="w-full max-w-3xl rounded text-slate-300 bg-white/10 backdrop-blur-lg p-6 shadow-lg">
-                            <DialogTitle class="font-black text-slate-100 text-2xl flex items-center">
-                                <GPTIcon
-                                    v-if="client === 'chatgpt'"
-                                    class="h-10 py-2 mr-2 block shadow transition duration-300 ease-in-out rounded-lg"
-                                />
-                                <GPTIcon
-                                    v-else-if="client === 'chatgpt-browser'"
-                                    class="h-10 py-2 mr-2 text-[#6ea194] block shadow transition duration-300 ease-in-out rounded-lg"
-                                />
-                                <BingIcon
-                                    v-else-if="client === 'bing'"
-                                    class="h-10 py-2 mr-2 block shadow transition duration-300 ease-in-out rounded-lg"
-                                />
-                                Settings
-                            </DialogTitle>
+        <!-- Full-screen scrollable container -->
+        <div class="fixed inset-0 overflow-y-auto">
+            <!-- Container to center the panel -->
+            <div class="flex min-h-full items-center justify-center p-4">
+                <!-- The actual dialog panel -->
+                <DialogPanel class="w-full max-w-3xl rounded text-slate-300 bg-white/10 backdrop-blur-lg p-6 shadow-lg">
+                    <DialogTitle class="font-black text-slate-100 text-2xl flex items-center">
+                        <GPTIcon
+                            v-if="client === 'chatgpt'"
+                            class="h-10 py-2 mr-2 block shadow transition duration-300 ease-in-out rounded-lg"
+                        />
+                        <GPTIcon
+                            v-else-if="client === 'chatgpt-browser'"
+                            class="h-10 py-2 mr-2 text-[#6ea194] block shadow transition duration-300 ease-in-out rounded-lg"
+                        />
+                        <BingIcon
+                            v-else-if="client === 'bing'"
+                            class="h-10 py-2 mr-2 block shadow transition duration-300 ease-in-out rounded-lg"
+                        />
+                        Settings
+                    </DialogTitle>
 
-                            <DialogDescription class="mt-3">
-                                <!-- Use generateForm function -->
-                                <div class="flex flex-col gap-2">
-                                    <template
-                                        v-for="(option, optionName) in availableOptions[client]"
-                                        :key="optionName"
-                                    >
-                                        <component :is="generateForm([option], optionName)[0]" />
-                                    </template>
-                                </div>
+                    <DialogDescription class="mt-3">
+                        <!-- Use generateForm function -->
+                        <div class="flex flex-col gap-2">
+                            <template
+                                v-for="(option, optionName) in availableOptions[client]"
+                                :key="optionName"
+                            >
+                                <component :is="generateForm([option], optionName)[0]" />
+                            </template>
+                        </div>
 
-                                <div class="flex flex-col sm:flex-row justify-end mt-4 gap-2">
-                                    <!-- Delete button -->
-                                    <Transition name="fade">
-                                        <button
-                                            v-if="saveAsName === defaultSaveAsName"
-                                            type="button"
-                                            class="
+                        <div class="flex flex-col sm:flex-row justify-end mt-4 gap-2">
+                            <!-- Delete button -->
+                            <Transition name="fade">
+                                <button
+                                    v-if="saveAsName === defaultSaveAsName"
+                                    type="button"
+                                    class="
                                                 flex items-center justify-center px-2 py-2 rounded bg-red-500/50 text-white/70
                                                 hover:text-white/90 hover:bg-red-500/60 transition duration-300
                                             "
-                                            @click="deletePresetHandler"
-                                        >
-                                            <Icon name="bx:bx-trash" />
-                                        </button>
-                                    </Transition>
-                                    <!-- Save as Name input -->
-                                    <div class="relative flex flex-col sm:flex-row items-stretch shadow-inner bg-white/5 rounded">
-                                        <label
-                                            class="
+                                    @click="deletePresetHandler"
+                                >
+                                    <Icon name="bx:bx-trash" />
+                                </button>
+                            </Transition>
+                            <!-- Save as Name input -->
+                            <div class="relative flex flex-col sm:flex-row items-stretch shadow-inner bg-white/5 rounded">
+                                <label
+                                    class="
                                                 text-white/60 text-xs h-full flex items-center px-3 py-2 border-white/5
                                                 border-b sm:border-r sm:border-b-0
                                             "
-                                        >
-                                            Preset Name
-                                        </label>
-                                        <input
-                                            type="text"
-                                            class="placeholder-white/40 bg-transparent text-slate-300 text-sm py-2 focus:outline-none pl-3 flex-1"
-                                            placeholder="Preset Name"
-                                            v-model="saveAsName"
-                                        />
-                                        <button
-                                            class="
+                                >
+                                    Preset Name
+                                </label>
+                                <input
+                                    type="text"
+                                    class="placeholder-white/40 bg-transparent text-slate-300 text-sm py-2 focus:outline-none pl-3 flex-1"
+                                    placeholder="Preset Name"
+                                    v-model="saveAsName"
+                                />
+                                <button
+                                    class="
                                                 flex items-center justify-center px-3 py-2 group
                                                 bg-white/5 sm:bg-transparent
                                             "
-                                            @click="resetSaveAsName"
-                                        >
-                                            <Icon name="bx:bx-reset" class="text-white/70 group-hover:text-white/90 transition" />
-                                        </button>
-                                    </div>
-                                    <button
-                                        type="button"
-                                        class="
+                                    @click="resetSaveAsName"
+                                >
+                                    <Icon name="bx:bx-reset" class="text-white/70 group-hover:text-white/90 transition" />
+                                </button>
+                            </div>
+                            <button
+                                type="button"
+                                class="
                                             flex items-center justify-center gap-1 py-2
                                             text-slate-300 rounded bg-white/10
                                             transition duration-300 ease-in-out
                                             hover:bg-white/20
                                         "
-                                        @click="save"
-                                    >
-                                        <Icon name="bx:bx-save" class="relative text-lg top-[1px] ml-4" /> <span class="mr-4">Save</span>
-                                    </button>
-                                </div>
-                            </DialogDescription>
-                        </DialogPanel>
-                    </div>
-                </div>
+                                @click="save"
+                            >
+                                <Icon name="bx:bx-save" class="relative text-lg top-[1px] ml-4" /> <span class="mr-4">Save</span>
+                            </button>
+                        </div>
+                    </DialogDescription>
+                </DialogPanel>
             </div>
-        </transition>
+        </div>
     </Dialog>
 </template>

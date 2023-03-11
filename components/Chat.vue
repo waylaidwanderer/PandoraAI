@@ -229,11 +229,11 @@ const setChatContainerHeight = () => {
     const headerElementHeight = document.querySelector('header').offsetHeight;
     const footerElementHeight = document.querySelector('footer').offsetHeight;
     const inputContainerElementHeight = inputContainerElement.value.offsetHeight;
-    const heightOffset = window.document.documentElement.clientHeight - window.innerHeight + 50;
+    const heightOffset = window.document.documentElement.clientHeight - window.innerHeight;
     const containerHeight = window.document.documentElement.clientHeight
         - (headerElementHeight + footerElementHeight)
         - inputContainerElementHeight
-        - (heightOffset / 2);
+        - heightOffset;
     // set container height
     messagesContainerElement.value.style.height = `${containerHeight}px`;
     // move input container element bottom down
@@ -310,7 +310,7 @@ if (!process.server) {
             :preset-name="clientSettingsModalPresetName"
         />
     </client-only>
-    <div class="flex flex-col flex-grow items-center">
+    <div class="flex flex-col flex-grow items-center relative">
         <div
             ref="messagesContainerElement"
             class="overflow-y-auto w-full rounded-sm pb-12 px-3 lg:px-0"

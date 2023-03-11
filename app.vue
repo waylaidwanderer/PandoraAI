@@ -25,21 +25,36 @@ onMounted(() => {
         class="fork-corner fc-size-small fc-pos-tr fc-animate fc-theme-github"
         title="Fork me on GitHub"
     ></a>
-    <div class="flex flex-col min-h-screen text-slate-300">
-        <header class="px-3 py-6 text-center bg-white/5 backdrop-blur shadow">
-            <h1 class="text-2xl font-bold text-white/80 drop-shadow-md">Pandora<span class="font-light">AI</span></h1>
-        </header>
-        <main class="flex flex-grow py-2">
-            <Chat/>
-        </main>
-        <footer class="px-3 py-6 text-center">
-            <span class="text-xs font-light text-slate-400">
-                powered by
-                <a href="https://github.com/waylaidwanderer/node-chatgpt-api" target="_blank">
-                    https://github.com/waylaidwanderer/node-chatgpt-api
-                </a>
-            </span>
-        </footer>
+    <div class="flex flex-row min-h-screen text-slate-300">
+        <div class="flex flex-col bg-white/10 flex-1 max-w-xs shadow-lg">
+            sidebar
+        </div>
+        <div class="flex flex-col flex-1">
+            <header class="px-3 py-6 text-center bg-white/5 backdrop-blur shadow-inner">
+                <!-- Menu icon -->
+                <button
+                    class="
+                    absolute top-0 left-0 p-3 ml-3 mt-3 text-white/70 hover:text-white/90 z-10
+                    focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-slate-900
+                    transition duration-300 ease-in-out
+                "
+                >
+                    <Icon name="bx:bx-menu" class="w-8 h-8" />
+                </button>
+                <h1 class="text-2xl font-bold text-white/80 drop-shadow-md">Pandora<span class="font-light">AI</span></h1>
+            </header>
+            <main class="flex flex-grow py-2">
+                <Chat/>
+            </main>
+            <footer class="px-3 pb-6 text-center">
+                <span class="text-xs font-light text-slate-400">
+                    powered by
+                    <a href="https://github.com/waylaidwanderer/node-chatgpt-api" target="_blank">
+                        https://github.com/waylaidwanderer/node-chatgpt-api
+                    </a>
+                </span>
+            </footer>
+        </div>
     </div>
 </template>
 

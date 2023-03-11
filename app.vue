@@ -19,7 +19,7 @@ onMounted(() => {
 
 <template>
     <a
-        href="https://github.com/waylaidwanderer/chatgpt-web-client"
+        href="https://github.com/waylaidwanderer/PandoraAI"
         target="_blank"
         id="fork-corner"
         class="fork-corner fc-size-small fc-pos-tr fc-animate fc-theme-github"

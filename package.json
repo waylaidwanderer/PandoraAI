@@ -1,4 +1,5 @@
 {
+  "name": "pandora-ai",
   "private": true,
   "scripts": {
     "build": "nuxt build",

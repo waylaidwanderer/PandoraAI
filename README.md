@@ -1,5 +1,5 @@
 <p align="center">
-  <img alt="Web client demo" src="./demos/client.png?v=1">
+  <img alt="Web client demo" src="./demos/client.png?v=2">
 </p>
 
 # PandoraAI

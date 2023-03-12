@@ -44,7 +44,7 @@ onMounted(() => {
             />
         </Transition>
         <div class="flex flex-col flex-1">
-            <header class="px-3 py-6 text-center bg-white/5 backdrop-blur shadow-inner">
+            <header class="px-3 py-6 text-center bg-purple-500/[15%] backdrop-blur shadow">
                 <!-- Menu icon -->
                 <button
                     @click="isMenuOpen = true"

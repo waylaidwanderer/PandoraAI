@@ -1,5 +1,10 @@
+function isMobile() {
+    return window.innerWidth <= 1024;
+}
+
 export const useAppStore = defineStore('appStore', () => {
-    const isMenuOpen = ref(window.innerWidth > 1024);
+    const isMobileMenu = ref(isMobile());
+    const isMenuOpen = ref(!isMobileMenu.value);
     const isMenuOpening = ref(false);
     const isMenuClosing = ref(false);
 
@@ -17,7 +22,20 @@ export const useAppStore = defineStore('appStore', () => {
         }, 300);
     });
 
+    onMounted(() => {
+        window.addEventListener('resize', onResize);
+    });
+
+    onBeforeUnmount(() => {
+        window.removeEventListener('resize', onResize);
+    });
+
+    function onResize() {
+        isMobileMenu.value = isMobile();
+    }
+
     return {
+        isMobileMenu,
         isMenuOpen,
         isMenuOpening,
         isMenuClosing,

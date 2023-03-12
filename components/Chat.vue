@@ -37,6 +37,14 @@ const {
     setActivePresetName,
 } = presetsStore;
 
+const conversationsStore = useConversationsStore();
+const {
+    activeConversation,
+} = storeToRefs(conversationsStore);
+const {
+    updateConversation,
+} = conversationsStore;
+
 const isClientDropdownOpen = ref(false);
 const isClientSettingsModalOpen = ref(false);
 const clientSettingsModalClient = ref(null);
@@ -47,12 +55,11 @@ const message = ref('');
 const processingController = ref(null);
 const suggestedResponses = ref([]);
 
-const conversationData = ref({});
 const messagesContainerElement = ref(null);
 const inputContainerElement = ref(null);
 const inputTextElement = ref(null);
 
-const canChangePreset = computed(() => !processingController.value && Object.keys(conversationData.value).length === 0);
+const canChangePreset = computed(() => !processingController.value && Object.keys(activeConversation.value.data).length === 0);
 
 // compute number of rows for textarea based on message newlines, up to 7
 const inputRows = computed(() => {
@@ -121,7 +128,7 @@ const sendMessage = async (input) => {
     }
 
     const data = {
-        ...conversationData.value,
+        ...activeConversation.value.data,
         message: input,
         stream: true,
         clientOptions,
@@ -131,7 +138,7 @@ const sendMessage = async (input) => {
         activePreset.value
         && activePreset.value.client === 'bing'
         && activePreset.value.options.jailbreakMode
-        && !conversationData.value.jailbreakConversationId
+        && !activeConversation.value.data.jailbreakConversationId
     ) {
         data.jailbreakConversationId = true;
     }
@@ -169,22 +176,22 @@ const sendMessage = async (input) => {
                 if (eventMessage.event === 'result') {
                     const result = JSON.parse(eventMessage.data);
                     if (result.jailbreakConversationId) {
-                        conversationData.value = {
+                        updateConversation(result.jailbreakConversationId, {
                             jailbreakConversationId: result.jailbreakConversationId,
                             parentMessageId: result.messageId,
-                        };
+                        });
                     } else if (result.conversationSignature) {
-                        conversationData.value = {
+                        updateConversation(result.conversationId, {
                             conversationId: result.conversationId,
                             conversationSignature: result.conversationSignature,
                             clientId: result.clientId,
                             invocationId: result.invocationId,
-                        };
+                        });
                     } else {
-                        conversationData.value = {
+                        updateConversation(result.conversationId, {
                             conversationId: result.conversationId,
                             parentMessageId: result.messageId,
-                        };
+                        });
                     }
                     console.debug(result);
                     const adaptiveText = result.details.adaptiveCards?.[0]?.body?.[0]?.text?.trim();

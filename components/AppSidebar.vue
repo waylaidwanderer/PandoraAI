@@ -3,12 +3,24 @@ import { storeToRefs } from 'pinia';
 import { useAppStore } from '~/stores/app';
 
 const appStore = useAppStore();
-
 const {
+    isMobileMenu,
     isMenuOpen,
     isMenuOpening,
     isMenuClosing,
 } = storeToRefs(appStore);
+
+const conversationsStore = useConversationsStore();
+const {
+    startNewConversation,
+} = conversationsStore;
+
+const startNewConversationHandler = () => {
+    startNewConversation();
+    if (isMobileMenu.value) {
+        isMenuOpen.value = false;
+    }
+};
 </script>
 
 <template>
@@ -48,6 +60,7 @@ const {
         <div class="flex-1 p-3">
             <!-- New Chat -->
             <button
+                @click="startNewConversationHandler"
                 class="
                     flex flex-row items-center w-full bg-white/5 rounded-lg shadow p-3 mb-3
                     transition duration-300 ease-in-out

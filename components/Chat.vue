@@ -327,6 +327,13 @@ if (!process.server) {
             setChatContainerHeight();
         });
     });
+
+    watch(currentConversation, () => {
+        if (!currentConversation.value) {
+            conversationData.value = {};
+            messages.value = [];
+        }
+    });
 }
 </script>
 

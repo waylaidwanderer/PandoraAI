@@ -7,6 +7,7 @@ const appStore = useAppStore();
 const {
     isMenuOpen,
     isMenuOpening,
+    isMenuClosing,
 } = storeToRefs(appStore);
 </script>
 
@@ -25,22 +26,24 @@ const {
         }"
     >
         <!-- close button -->
-        <div
-            v-if="isMenuOpen"
-            class="absolute top-0 right-0 -mr-4 bottom-0 flex items-center lg:hidden"
-        >
-            <button
-                @click="isMenuOpen = false"
-                class="
-                    bg-white/20 rounded-full shadow backdrop-blur-lg
-                    text-white/70 hover:text-white/90
+        <Transition name="fade">
+            <div
+                v-if="isMenuOpen || isMenuClosing"
+                class="absolute top-0 -right-8 bottom-0 flex items-center lg:hidden"
+            >
+                <button
+                    @click="isMenuOpen = false"
+                    class="
+                    bg-purple-300/10 rounded-r backdrop-blur-lg
+                    text-white/50 hover:text-white/80
                     focus:outline-none z-10
                     transition duration-300 ease-in-out
                 "
-            >
-                <Icon name="bx:bx-x" class="w-8 h-8"/>
-            </button>
-        </div>
+                >
+                    <Icon name="bx:bx-chevron-left" class="w-8 h-8"/>
+                </button>
+            </div>
+        </Transition>
         <!-- Chat threads -->
         <div class="flex-1 p-3">
             <!-- New Chat -->

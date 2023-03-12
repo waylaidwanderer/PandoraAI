@@ -3,7 +3,6 @@ import { fetchEventSource } from '@microsoft/fetch-event-source';
 import { marked } from 'marked';
 import DOMPurify from 'isomorphic-dompurify';
 import hljs from 'highlight.js';
-import { v4 as uuidv4 } from 'uuid';
 import { storeToRefs } from 'pinia';
 import BingIcon from '~/components/Icons/BingIcon.vue';
 import GPTIcon from '~/components/Icons/GPTIcon.vue';
@@ -37,17 +36,28 @@ const {
     setActivePresetName,
 } = presetsStore;
 
+const conversationsStore = useConversationsStore();
+const {
+    newConversationCounter,
+    currentConversation,
+    processingController,
+} = storeToRefs(conversationsStore);
+const {
+    updateConversation,
+} = conversationsStore;
+
 const isClientDropdownOpen = ref(false);
 const isClientSettingsModalOpen = ref(false);
 const clientSettingsModalClient = ref(null);
 const clientSettingsModalPresetName = ref(null);
 
-const messages = ref([]);
+const activePresetNameToUse = computed(() => currentConversation.value?.activePresetName || activePresetName.value);
+const activePresetToUse = computed(() => currentConversation.value?.activePreset || activePreset.value);
+const conversationData = ref(currentConversation.value?.data || {});
+const messages = ref(currentConversation.value?.messages || []);
 const message = ref('');
-const processingController = ref(null);
 const suggestedResponses = ref([]);
 
-const conversationData = ref({});
 const messagesContainerElement = ref(null);
 const inputContainerElement = ref(null);
 const inputTextElement = ref(null);
@@ -72,6 +82,23 @@ const stopProcessing = () => {
     processingController.value = null;
 };
 
+const setChatContainerHeight = () => {
+    const headerElementHeight = document.querySelector('header').offsetHeight;
+    const footerElementHeight = document.querySelector('footer').offsetHeight;
+    const inputContainerElementHeight = inputContainerElement.value.offsetHeight;
+    const heightOffset = window.document.documentElement.clientHeight - window.innerHeight;
+    const containerHeight = window.document.documentElement.clientHeight
+        - (headerElementHeight + footerElementHeight)
+        - inputContainerElementHeight
+        - heightOffset
+        - 50;
+    // set container height
+    messagesContainerElement.value.style.height = `${containerHeight}px`;
+    // move input container element bottom down
+    inputContainerElement.value.style.bottom = `${heightOffset}px`;
+    scrollToBottom();
+};
+
 const sendMessage = async (input) => {
     if (processingController.value) {
         return;
@@ -89,34 +116,35 @@ const sendMessage = async (input) => {
 
     message.value = '';
 
-    const messageId = uuidv4();
-
-    messages.value.push({
-        id: messageId,
+    const userMessage = {
+        id: 'new',
+        parentMessageId: conversationData.value?.parentMessageId,
         text: input,
         role: 'user',
-    });
+    };
+    messages.value.push(userMessage);
+    const userMessageIndex = messages.value.length - 1;
 
-    messages.value.push({
-        id: uuidv4(),
+    const botMessage = {
+        id: 'bot-new',
         text: '',
         role: 'bot',
-    });
+    };
+    messages.value.push(botMessage);
+    const botMessageIndex = messages.value.length - 1;
 
     await nextTick();
     scrollToBottom();
 
-    const botMessage = messages.value[messages.value.length - 1];
-
     let clientOptions;
-    if (activePreset.value?.options.clientOptions) {
+    if (activePresetToUse.value?.options.clientOptions) {
         clientOptions = {
-            ...activePreset.value?.options.clientOptions,
-            clientToUse: activePreset.value?.client,
+            ...activePresetToUse.value?.options.clientOptions,
+            clientToUse: activePresetToUse.value?.client,
         };
     } else {
         clientOptions = {
-            clientToUse: activePresetName.value,
+            clientToUse: activePresetNameToUse.value,
         };
     }
 
@@ -128,9 +156,9 @@ const sendMessage = async (input) => {
     };
 
     if (
-        activePreset.value
-        && activePreset.value.client === 'bing'
-        && activePreset.value.options.jailbreakMode
+        activePresetToUse.value
+        && activePresetToUse.value.client === 'bing'
+        && activePresetToUse.value.options.jailbreakMode
         && !conversationData.value.jailbreakConversationId
     ) {
         data.jailbreakConversationId = true;
@@ -168,12 +196,21 @@ const sendMessage = async (input) => {
                 }
                 if (eventMessage.event === 'result') {
                     const result = JSON.parse(eventMessage.data);
+                    console.debug(result);
+                    messages.value[userMessageIndex].id = result.parentMessageId;
+                    messages.value[botMessageIndex].id = result.messageId;
+                    messages.value[botMessageIndex].parentMessageId = result.parentMessageId;
+                    let conversationId;
                     if (result.jailbreakConversationId) {
+                        // Bing jailbreak mode
+                        conversationId = result.jailbreakConversationId;
                         conversationData.value = {
                             jailbreakConversationId: result.jailbreakConversationId,
                             parentMessageId: result.messageId,
                         };
                     } else if (result.conversationSignature) {
+                        // Bing
+                        conversationId = result.conversationId;
                         conversationData.value = {
                             conversationId: result.conversationId,
                             conversationSignature: result.conversationSignature,
@@ -181,64 +218,53 @@ const sendMessage = async (input) => {
                             invocationId: result.invocationId,
                         };
                     } else {
+                        // other clients
+                        conversationId = result.conversationId;
                         conversationData.value = {
                             conversationId: result.conversationId,
                             parentMessageId: result.messageId,
                         };
                     }
-                    console.debug(result);
                     const adaptiveText = result.details.adaptiveCards?.[0]?.body?.[0]?.text?.trim();
                     if (adaptiveText) {
                         console.debug('adaptiveText', adaptiveText);
-                        botMessage.text = adaptiveText;
+                        messages.value[botMessageIndex].text = adaptiveText;
                     } else {
-                        botMessage.text = result.response;
+                        messages.value[botMessageIndex].text = result.response;
                     }
-                    botMessage.raw = result;
+                    messages.value[botMessageIndex].raw = result;
                     if (result.details.suggestedResponses) {
                         suggestedResponses.value = result.details.suggestedResponses.map(response => response.text);
                     }
-                    nextTick().then(() => scrollToBottom());
+                    // TODO: store active preset too
+                    updateConversation(conversationId, conversationData.value, messages.value, activePresetNameToUse.value, activePresetToUse.value);
+                    nextTick(() => {
+                        setChatContainerHeight();
+                    });
                     return;
                 }
                 if (eventMessage.event === 'error') {
                     const eventMessageData = JSON.parse(eventMessage.data);
-                    botMessage.text = eventMessageData.error || 'An error occurred. Please try again.';
-                    botMessage.error = true;
-                    botMessage.raw = eventMessageData;
+                    messages.value[botMessageIndex].text = eventMessageData.error || 'An error occurred. Please try again.';
+                    messages.value[botMessageIndex].error = true;
+                    messages.value[botMessageIndex].raw = eventMessageData;
                     nextTick().then(() => scrollToBottom());
                     return;
                 }
-                botMessage.text += JSON.parse(eventMessage.data);
+                messages.value[botMessageIndex].text += JSON.parse(eventMessage.data);
                 nextTick().then(() => scrollToBottom());
             },
         });
     } catch (err) {
         console.error('ERROR', err);
     } finally {
-        if (!processingController.value.signal.aborted) {
+        if (!processingController.value?.signal.aborted) {
             processingController.value.abort();
         }
         processingController.value = null;
         await nextTick();
         inputTextElement.value.focus();
     }
-};
-
-const setChatContainerHeight = () => {
-    const headerElementHeight = document.querySelector('header').offsetHeight;
-    const footerElementHeight = document.querySelector('footer').offsetHeight;
-    const inputContainerElementHeight = inputContainerElement.value.offsetHeight;
-    const heightOffset = window.document.documentElement.clientHeight - window.innerHeight + 50;
-    const containerHeight = window.document.documentElement.clientHeight
-        - (headerElementHeight + footerElementHeight)
-        - inputContainerElementHeight
-        - (heightOffset / 2);
-    // set container height
-    messagesContainerElement.value.style.height = `${containerHeight}px`;
-    // move input container element bottom down
-    inputContainerElement.value.style.bottom = `${heightOffset}px`;
-    scrollToBottom();
 };
 
 const parseMarkdown = (text, streaming = false) => {
@@ -284,7 +310,9 @@ const setIsClientSettingsModalOpen = (isOpen, client = null, presetName = null) 
 if (!process.server) {
     onMounted(() => {
         window.addEventListener('resize', setChatContainerHeight);
-        setChatContainerHeight();
+        nextTick(() => {
+            setChatContainerHeight();
+        });
     });
 
     onUnmounted(() => {
@@ -298,6 +326,29 @@ if (!process.server) {
             setChatContainerHeight();
         });
     });
+
+    watch(isClientDropdownOpen, () => {
+        nextTick(() => {
+            setChatContainerHeight();
+        });
+    });
+
+    watch(currentConversation, () => {
+        if (currentConversation.value) {
+            conversationData.value = currentConversation.value.data;
+            messages.value = currentConversation.value.messages;
+        } else {
+            conversationData.value = {};
+            messages.value = [];
+        }
+        suggestedResponses.value = [];
+    });
+
+    watch(newConversationCounter, () => {
+        conversationData.value = {};
+        messages.value = [];
+        suggestedResponses.value = [];
+    });
 }
 </script>
 
@@ -310,16 +361,18 @@ if (!process.server) {
             :preset-name="clientSettingsModalPresetName"
         />
     </client-only>
-    <div class="flex flex-col flex-grow items-center">
+    <div class="flex flex-col flex-grow items-center relative">
+        <!--suppress CssInvalidPropertyValue -->
         <div
             ref="messagesContainerElement"
-            class="overflow-y-auto w-full rounded-sm pb-12 px-3 lg:px-0"
+            class="overflow-y-auto w-full rounded-sm pb-12 px-3"
+            style="overflow: overlay;"
         >
             <TransitionGroup name="messages">
                 <div
                     class="max-w-4xl w-full mx-auto"
-                    v-for="message in messages"
-                    :key="message.id"
+                    v-for="(message, index) in messages"
+                    :key="index"
                 >
                     <div
                         class="p-3 rounded-sm"
@@ -332,10 +385,10 @@ if (!process.server) {
                             class="text-xs text-white/50 mb-1"
                         >
                             <template v-if="message.role === 'bot'">
-                                {{ activePreset?.options?.clientOptions?.chatGptLabel || 'AI' }}
+                                {{ activePresetToUse?.options?.clientOptions?.chatGptLabel || 'AI' }}
                             </template>
                             <template v-else-if="message.role === 'user'">
-                                {{ activePreset?.options?.clientOptions?.userLabel || 'User' }}
+                                {{ activePresetToUse?.options?.clientOptions?.userLabel || 'User' }}
                             </template>
                             <template v-else>
                                 {{ message.role }}
@@ -352,7 +405,7 @@ if (!process.server) {
         </div>
         <div
             ref="inputContainerElement"
-            class="mx-auto w-full max-w-4xl px-3 lg:px-0 flex flex-row absolute left-0 right-0 mb-7 sm:mb-0 z-10"
+            class="mx-auto w-full max-w-4xl px-3 xl:px-0 flex flex-row absolute left-0 right-0 mb-7 sm:mb-0 z-10"
         >
             <div class="relative flex flex-row w-full justify-center items-stretch rounded shadow">
                 <div
@@ -384,7 +437,7 @@ if (!process.server) {
                 <Transition name="slide-from-bottom">
                     <ClientDropdown
                         v-if="isClientDropdownOpen"
-                        :preset-name="activePresetName"
+                        :preset-name="activePresetNameToUse"
                         :set-client-to-use="setActivePresetName"
                         :set-is-client-settings-modal-open="setIsClientSettingsModalOpen"
                     />
@@ -396,7 +449,7 @@ if (!process.server) {
                 >
                     <Transition name="fade" mode="out-in">
                         <GPTIcon
-                            v-if="activePresetName === 'chatgpt' || activePreset?.client === 'chatgpt'"
+                            v-if="activePresetNameToUse === 'chatgpt' || activePresetToUse?.client === 'chatgpt'"
                             class="w-10 h-10 p-2 block transition duration-300 ease-in-out rounded-lg"
                             :class="{
                                 'opacity-50 cursor-not-allowed': !!processingController,
@@ -406,7 +459,7 @@ if (!process.server) {
                             }"
                         />
                         <GPTIcon
-                            v-else-if="activePresetName === 'chatgpt-browser' || activePreset?.client === 'chatgpt-browser'"
+                            v-else-if="activePresetNameToUse === 'chatgpt-browser' || activePresetToUse?.client === 'chatgpt-browser'"
                             class="w-10 h-10 p-2 text-[#6ea194] block transition duration-300 ease-in-out rounded-lg"
                             :class="{
                                 'opacity-50 cursor-not-allowed': !!processingController,
@@ -416,7 +469,7 @@ if (!process.server) {
                             }"
                         />
                         <BingIcon
-                            v-else-if="activePresetName === 'bing' || activePreset?.client === 'bing'"
+                            v-else-if="activePresetNameToUse === 'bing' || activePresetToUse?.client === 'bing'"
                             class="w-10 h-10 p-2 block transition duration-300 ease-in-out rounded-lg"
                             :class="{
                                 'opacity-50 cursor-not-allowed': !!processingController,
@@ -475,15 +528,6 @@ if (!process.server) {
    animations can be calculated correctly. */
 .messages-leave-active {
     position: absolute;
-    opacity: 0;
-}
-
-.fade-enter-active,
-.fade-leave-active {
-    transition: opacity 0.15s ease-in-out;
-}
-.fade-enter-from,
-.fade-leave-to {
     opacity: 0;
 }
 

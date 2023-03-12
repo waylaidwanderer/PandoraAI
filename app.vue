@@ -1,7 +1,10 @@
 <script setup>
 // eslint-disable-next-line import/no-extraneous-dependencies
 import 'fork-corner/dist/fork-corner.css';
+import { storeToRefs } from 'pinia';
 import initForkCorner from '~/fork-corner';
+import AppSidebar from '~/components/AppSidebar.vue';
+import { useAppStore } from '~/stores/app';
 
 useHead({
     meta: [
@@ -11,6 +14,12 @@ useHead({
         },
     ],
 });
+
+const appStore = useAppStore();
+
+const {
+    isMenuOpen,
+} = storeToRefs(appStore);
 
 onMounted(() => {
     initForkCorner();
@@ -26,18 +35,24 @@ onMounted(() => {
         title="Fork me on GitHub"
     ></a>
     <div class="flex flex-row min-h-screen text-slate-300">
-        <div class="flex flex-col bg-white/10 flex-1 max-w-xs shadow-lg">
-            sidebar
-        </div>
+        <AppSidebar/>
+        <Transition name="fade">
+            <div
+                v-if="isMenuOpen"
+                @click="isMenuOpen = false"
+                class="fixed inset-0 bg-black/30 z-10" aria-hidden="true"
+            />
+        </Transition>
         <div class="flex flex-col flex-1">
             <header class="px-3 py-6 text-center bg-white/5 backdrop-blur shadow-inner">
                 <!-- Menu icon -->
                 <button
+                    @click="isMenuOpen = true"
                     class="
-                    absolute top-0 left-0 p-3 ml-3 mt-3 text-white/70 hover:text-white/90 z-10
-                    focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-slate-900
-                    transition duration-300 ease-in-out
-                "
+                        absolute top-0 left-0 p-3 ml-3 mt-3 text-white/70 hover:text-white/90 z-10
+                        focus:outline-none
+                        transition duration-300 ease-in-out
+                    "
                 >
                     <Icon name="bx:bx-menu" class="w-8 h-8" />
                 </button>
@@ -98,5 +113,16 @@ footer a {
 
 .fork-corner.fc-theme-github > i {
     @apply text-white/80;
+}
+
+.slide-leave-active,
+.slide-enter-active {
+    transition: 0.3s;
+}
+.slide-enter {
+    transform: translate(100%, 0);
+}
+.slide-leave-to {
+    transform: translate(-100%, 0);
 }
 </style>

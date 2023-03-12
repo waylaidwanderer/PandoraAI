@@ -4,7 +4,7 @@ import {
     DialogTitle,
     DialogDescription,
     DialogPanel,
-    Switch, TransitionRoot,
+    Switch,
 } from '@headlessui/vue';
 import get from 'lodash/get';
 import set from 'lodash/set';

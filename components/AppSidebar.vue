@@ -147,7 +147,7 @@ const clearConversationsHandler = () => {
             </TransitionGroup>
         </div>
         <!-- Sidebar footer -->
-        <div class="flex flex-col items-start gap-2 bg-black/5 p-6 min-h-[100px]">
+        <div class="flex flex-col items-start gap-2 bg-black/5 p-6 min-h-[100px] text-sm">
             <button
                 @click="clearConversationsHandler"
                 class="flex gap-1 items-center justify-center text-white/60 transition duration-300 hover:text-white/80"

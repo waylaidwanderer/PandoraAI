@@ -10,7 +10,7 @@ export const useConversationsStore = defineStore('conversationsStore', () => {
     });
     const conversationTitle = computed(() => currentConversation.value?.title || 'New Chat');
 
-    function updateConversation(id, updatedConversationData, messages) {
+    function updateConversation(id, updatedConversationData, messages, activePresetName, activePreset) {
         currentConversationId.value = id;
         const conversation = conversations.value[id];
         if (conversation) {
@@ -24,6 +24,8 @@ export const useConversationsStore = defineStore('conversationsStore', () => {
             messages,
             createdAt: Date.now(),
             updatedAt: Date.now(),
+            activePresetName,
+            activePreset,
         };
     }
 

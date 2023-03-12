@@ -50,6 +50,8 @@ const isClientSettingsModalOpen = ref(false);
 const clientSettingsModalClient = ref(null);
 const clientSettingsModalPresetName = ref(null);
 
+const activePresetNameToUse = computed(() => currentConversation.value?.activePresetName || activePresetName.value);
+const activePresetToUse = computed(() => currentConversation.value?.activePreset || activePreset.value);
 const conversationData = ref(currentConversation.value?.data || {});
 const messages = ref(currentConversation.value?.messages || []);
 const message = ref('');
@@ -135,14 +137,14 @@ const sendMessage = async (input) => {
     scrollToBottom();
 
     let clientOptions;
-    if (activePreset.value?.options.clientOptions) {
+    if (activePresetToUse.value?.options.clientOptions) {
         clientOptions = {
-            ...activePreset.value?.options.clientOptions,
-            clientToUse: activePreset.value?.client,
+            ...activePresetToUse.value?.options.clientOptions,
+            clientToUse: activePresetToUse.value?.client,
         };
     } else {
         clientOptions = {
-            clientToUse: activePresetName.value,
+            clientToUse: activePresetNameToUse.value,
         };
     }
 
@@ -154,9 +156,9 @@ const sendMessage = async (input) => {
     };
 
     if (
-        activePreset.value
-        && activePreset.value.client === 'bing'
-        && activePreset.value.options.jailbreakMode
+        activePresetToUse.value
+        && activePresetToUse.value.client === 'bing'
+        && activePresetToUse.value.options.jailbreakMode
         && !conversationData.value.jailbreakConversationId
     ) {
         data.jailbreakConversationId = true;
@@ -235,7 +237,7 @@ const sendMessage = async (input) => {
                         suggestedResponses.value = result.details.suggestedResponses.map(response => response.text);
                     }
                     // TODO: store active preset too
-                    updateConversation(conversationId, conversationData.value, messages.value);
+                    updateConversation(conversationId, conversationData.value, messages.value, activePresetNameToUse.value, activePresetToUse.value);
                     nextTick(() => {
                         setChatContainerHeight();
                     });
@@ -339,11 +341,13 @@ if (!process.server) {
             conversationData.value = {};
             messages.value = [];
         }
+        suggestedResponses.value = [];
     });
 
     watch(newConversationCounter, () => {
         conversationData.value = {};
         messages.value = [];
+        suggestedResponses.value = [];
     });
 }
 </script>
@@ -381,10 +385,10 @@ if (!process.server) {
                             class="text-xs text-white/50 mb-1"
                         >
                             <template v-if="message.role === 'bot'">
-                                {{ activePreset?.options?.clientOptions?.chatGptLabel || 'AI' }}
+                                {{ activePresetToUse?.options?.clientOptions?.chatGptLabel || 'AI' }}
                             </template>
                             <template v-else-if="message.role === 'user'">
-                                {{ activePreset?.options?.clientOptions?.userLabel || 'User' }}
+                                {{ activePresetToUse?.options?.clientOptions?.userLabel || 'User' }}
                             </template>
                             <template v-else>
                                 {{ message.role }}
@@ -433,7 +437,7 @@ if (!process.server) {
                 <Transition name="slide-from-bottom">
                     <ClientDropdown
                         v-if="isClientDropdownOpen"
-                        :preset-name="activePresetName"
+                        :preset-name="activePresetNameToUse"
                         :set-client-to-use="setActivePresetName"
                         :set-is-client-settings-modal-open="setIsClientSettingsModalOpen"
                     />
@@ -445,7 +449,7 @@ if (!process.server) {
                 >
                     <Transition name="fade" mode="out-in">
                         <GPTIcon
-                            v-if="activePresetName === 'chatgpt' || activePreset?.client === 'chatgpt'"
+                            v-if="activePresetNameToUse === 'chatgpt' || activePresetToUse?.client === 'chatgpt'"
                             class="w-10 h-10 p-2 block transition duration-300 ease-in-out rounded-lg"
                             :class="{
                                 'opacity-50 cursor-not-allowed': !!processingController,
@@ -455,7 +459,7 @@ if (!process.server) {
                             }"
                         />
                         <GPTIcon
-                            v-else-if="activePresetName === 'chatgpt-browser' || activePreset?.client === 'chatgpt-browser'"
+                            v-else-if="activePresetNameToUse === 'chatgpt-browser' || activePresetToUse?.client === 'chatgpt-browser'"
                             class="w-10 h-10 p-2 text-[#6ea194] block transition duration-300 ease-in-out rounded-lg"
                             :class="{
                                 'opacity-50 cursor-not-allowed': !!processingController,
@@ -465,7 +469,7 @@ if (!process.server) {
                             }"
                         />
                         <BingIcon
-                            v-else-if="activePresetName === 'bing' || activePreset?.client === 'bing'"
+                            v-else-if="activePresetNameToUse === 'bing' || activePresetToUse?.client === 'bing'"
                             class="w-10 h-10 p-2 block transition duration-300 ease-in-out rounded-lg"
                             :class="{
                                 'opacity-50 cursor-not-allowed': !!processingController,

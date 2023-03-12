@@ -34,6 +34,13 @@ const startNewConversationHandler = () => {
     }
 };
 
+const setCurrentConversationIdHandler = (conversationId) => {
+    setCurrentConversationId(conversationId);
+    if (isMobileMenu.value) {
+        isMenuOpen.value = false;
+    }
+};
+
 const deleteConversationHandler = (conversationId) => {
     deleteConversation(conversationId);
     if (isMobileMenu.value) {
@@ -118,7 +125,7 @@ const clearConversationsHandler = () => {
                 >
                     <button
                         class="flex flex-col flex-1 text-left overflow-hidden"
-                        @click="setCurrentConversationId(conversation.data.conversationId)"
+                        @click="setCurrentConversationIdHandler(conversation.data.conversationId)"
                     >
                         <span class="text-sm mb-1">
                             {{ conversation.title || 'New Chat' }}
@@ -159,7 +166,7 @@ const clearConversationsHandler = () => {
 .slide-from-left-move,
 .slide-from-left-enter-active,
 .slide-from-left-leave-active {
-    transition: all 0.5s ease;
+    transition: all 0.3s ease;
 }
 .slide-from-left-enter-from,
 .slide-from-left-leave-to {

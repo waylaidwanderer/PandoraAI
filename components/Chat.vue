@@ -121,14 +121,15 @@ const sendMessage = async (input) => {
         role: 'user',
     };
     messages.value.push(userMessage);
+    const userMessageIndex = messages.value.length - 1;
 
-    let botMessage = {
+    const botMessage = {
         id: 'bot-new',
         text: '',
         role: 'bot',
     };
     messages.value.push(botMessage);
-    botMessage = messages.value[messages.value.length - 1];
+    const botMessageIndex = messages.value.length - 1;
 
     await nextTick();
     scrollToBottom();
@@ -194,9 +195,9 @@ const sendMessage = async (input) => {
                 if (eventMessage.event === 'result') {
                     const result = JSON.parse(eventMessage.data);
                     console.debug(result);
-                    userMessage.id = result.parentMessageId;
-                    botMessage.id = result.messageId;
-                    botMessage.parentMessageId = result.parentMessageId;
+                    messages.value[userMessageIndex].id = result.parentMessageId;
+                    messages.value[botMessageIndex].id = result.messageId;
+                    messages.value[botMessageIndex].parentMessageId = result.parentMessageId;
                     let conversationId;
                     if (result.jailbreakConversationId) {
                         // Bing jailbreak mode
@@ -222,18 +223,19 @@ const sendMessage = async (input) => {
                             parentMessageId: result.messageId,
                         };
                     }
-                    updateConversation(conversationId, conversationData.value, messages.value);
                     const adaptiveText = result.details.adaptiveCards?.[0]?.body?.[0]?.text?.trim();
                     if (adaptiveText) {
                         console.debug('adaptiveText', adaptiveText);
-                        botMessage.text = adaptiveText;
+                        messages.value[botMessageIndex].text = adaptiveText;
                     } else {
-                        botMessage.text = result.response;
+                        messages.value[botMessageIndex].text = result.response;
                     }
-                    botMessage.raw = result;
+                    messages.value[botMessageIndex].raw = result;
                     if (result.details.suggestedResponses) {
                         suggestedResponses.value = result.details.suggestedResponses.map(response => response.text);
                     }
+                    // TODO: store active preset too
+                    updateConversation(conversationId, conversationData.value, messages.value);
                     nextTick(() => {
                         setChatContainerHeight();
                     });
@@ -241,13 +243,13 @@ const sendMessage = async (input) => {
                 }
                 if (eventMessage.event === 'error') {
                     const eventMessageData = JSON.parse(eventMessage.data);
-                    botMessage.text = eventMessageData.error || 'An error occurred. Please try again.';
-                    botMessage.error = true;
-                    botMessage.raw = eventMessageData;
+                    messages.value[botMessageIndex].text = eventMessageData.error || 'An error occurred. Please try again.';
+                    messages.value[botMessageIndex].error = true;
+                    messages.value[botMessageIndex].raw = eventMessageData;
                     nextTick().then(() => scrollToBottom());
                     return;
                 }
-                botMessage.text += JSON.parse(eventMessage.data);
+                messages.value[botMessageIndex].text += JSON.parse(eventMessage.data);
                 nextTick().then(() => scrollToBottom());
             },
         });

@@ -40,6 +40,7 @@ const conversationsStore = useConversationsStore();
 const {
     newConversationCounter,
     currentConversation,
+    processingController,
 } = storeToRefs(conversationsStore);
 const {
     updateConversation,
@@ -55,7 +56,6 @@ const activePresetToUse = computed(() => currentConversation.value?.activePreset
 const conversationData = ref(currentConversation.value?.data || {});
 const messages = ref(currentConversation.value?.messages || []);
 const message = ref('');
-const processingController = ref(null);
 const suggestedResponses = ref([]);
 
 const messagesContainerElement = ref(null);

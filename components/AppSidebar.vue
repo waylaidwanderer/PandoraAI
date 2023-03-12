@@ -14,6 +14,7 @@ const conversationsStore = useConversationsStore();
 const {
     currentConversationId,
     conversations,
+    processingController,
 } = storeToRefs(conversationsStore);
 const {
     startNewConversation,
@@ -43,9 +44,6 @@ const setCurrentConversationIdHandler = (conversationId) => {
 
 const deleteConversationHandler = (conversationId) => {
     deleteConversation(conversationId);
-    if (isMobileMenu.value) {
-        isMenuOpen.value = false;
-    }
 };
 
 const clearConversationsHandler = () => {
@@ -104,6 +102,8 @@ const clearConversationsHandler = () => {
                     transition duration-300 ease-in-out
                     hover:bg-white/10
                 "
+                :disabled="!!processingController"
+                :class="{ 'cursor-not-allowed': !!processingController }"
             >
                     <span class="flex flex-col flex-1 text-left">
                         <span class="text-sm font-bold text-white/80">New Chat</span>
@@ -126,6 +126,8 @@ const clearConversationsHandler = () => {
                     <button
                         class="flex flex-col flex-1 text-left overflow-hidden"
                         @click="setCurrentConversationIdHandler(conversation.data.conversationId)"
+                        :disabled="!!processingController"
+                        :class="{ 'cursor-not-allowed': !!processingController }"
                     >
                         <span class="text-sm mb-1">
                             {{ conversation.title || 'New Chat' }}
@@ -140,6 +142,8 @@ const clearConversationsHandler = () => {
                     <button
                         @click="deleteConversationHandler(conversation.data.conversationId)"
                         class="flex items-center justify-center px-3 text-white/30 hover:text-white/60"
+                        :disabled="!!processingController"
+                        :class="{ 'cursor-not-allowed': !!processingController }"
                     >
                         <Icon name="bx:bx-trash" class="w-4 h-4"/>
                     </button>
@@ -151,6 +155,8 @@ const clearConversationsHandler = () => {
             <button
                 @click="clearConversationsHandler"
                 class="flex gap-1 items-center justify-center text-white/60 transition duration-300 hover:text-white/80"
+                :disabled="!!processingController"
+                :class="{ 'cursor-not-allowed': !!processingController }"
             >
                 <Icon :name="isConfirmingClear ? 'bx:bx-check' : 'bx:bx-trash'" class="w-4 h-4 relative top-px"/>
                 Clear all conversations{{ isConfirmingClear ? '?' : '' }}

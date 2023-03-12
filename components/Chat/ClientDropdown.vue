@@ -28,8 +28,8 @@ const customPresets = computed(() => presets.value.filter(preset => !['OpenAI AP
     <div
         class="flex flex-col absolute bottom-full w-full overflow-hidden"
     >
-        <div class="flex items-center justify-end gap-2 shadow-sm bg-white/[15%] text-sm backdrop-blur rounded-t py-1 px-3">
-            <AppData/>
+        <div class="flex items-center justify-start gap-2 shadow-sm bg-white/[15%] text-white/80 text-sm backdrop-blur rounded-t py-1 px-3">
+            Presets
         </div>
         <div class="flex flex-col items-stretch bg-white/10 backdrop-blur-sm overflow-auto max-h-[160px]">
             <div class="w-full flex flex-row">

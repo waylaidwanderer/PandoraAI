@@ -2,6 +2,8 @@ export const useConversationsStore = defineStore('conversationsStore', () => {
     const newConversationCounter = ref(0);
     const conversations = useLocalStorage('conversations', {});
     const currentConversationId = ref('');
+    const processingController = ref(null);
+
     const currentConversation = computed(() => {
         if (!currentConversationId.value) {
             return null;
@@ -30,26 +32,39 @@ export const useConversationsStore = defineStore('conversationsStore', () => {
     }
 
     function startNewConversation() {
+        if (processingController.value) {
+            return;
+        }
         // this counter is really only meant for watcher to trigger updates
         newConversationCounter.value += 1;
         currentConversationId.value = '';
     }
 
     function setCurrentConversationId(id) {
+        if (processingController.value) {
+            return;
+        }
         currentConversationId.value = id;
     }
 
     function deleteConversation(id) {
+        if (processingController.value) {
+            return;
+        }
         delete conversations.value[id];
         startNewConversation();
     }
 
     function clearConversations() {
+        if (processingController.value) {
+            return;
+        }
         conversations.value = {};
         startNewConversation();
     }
 
     return {
+        processingController,
         newConversationCounter,
         conversations,
         currentConversationId,

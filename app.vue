@@ -6,7 +6,15 @@ import initForkCorner from '~/fork-corner';
 import AppSidebar from '~/components/AppSidebar.vue';
 import { useAppStore } from '~/stores/app';
 
+const appStore = useAppStore();
+
+const {
+    isMenuOpen,
+    conversationTitle,
+} = storeToRefs(appStore);
+
 useHead({
+    title: `${conversationTitle.value} - PandoraAI`,
     meta: [
         {
             name: 'viewport',
@@ -14,12 +22,6 @@ useHead({
         },
     ],
 });
-
-const appStore = useAppStore();
-
-const {
-    isMenuOpen,
-} = storeToRefs(appStore);
 
 onMounted(() => {
     initForkCorner();
@@ -52,10 +54,27 @@ onMounted(() => {
                         absolute top-0 left-0 p-3 ml-3 mt-3 text-white/70 hover:text-white/90 z-10
                         focus:outline-none
                         transition duration-300 ease-in-out
+                        lg:hidden
                     "
                 >
                     <Icon name="bx:bx-menu" class="w-8 h-8" />
                 </button>
+                <!-- Show/Hide sidebar button (lg) -->
+                <button
+                    @click="isMenuOpen = !isMenuOpen"
+                    class="
+                        absolute top-0 left-0 p-3 ml-3 mt-3 text-white/70 hover:text-white/90 z-10
+                        focus:outline-none
+                        transition duration-300 ease-in-out
+                        hidden lg:block
+                    "
+                >
+                    <Icon
+                        :name="isMenuOpen ? 'bx:bx-chevron-left' : 'bx:bx-chevron-right'"
+                        class="w-8 h-8"
+                    />
+                </button>
+                <!-- Title -->
                 <h1 class="text-2xl font-bold text-white/80 drop-shadow-md">Pandora<span class="font-light">AI</span></h1>
             </header>
             <main class="flex flex-grow py-2">

@@ -145,14 +145,19 @@ footer a {
 
 #fork-corner {
     z-index: 41;
+    top: 5px !important;
+    right: 5px !important;
 }
 
 .fork-corner.fc-theme-github + div {
+    top: -88px !important;
+    right: -88px !important;
     @apply shadow bg-black/50 z-40;
 }
 
 .fork-corner.fc-theme-github > i {
     @apply text-white/80;
+    font-size: 35px !important;
 }
 
 ::-webkit-scrollbar {

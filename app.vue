@@ -10,6 +10,7 @@ const appStore = useAppStore();
 
 const {
     isMenuOpen,
+    isMenuOpening,
     conversationTitle,
 } = storeToRefs(appStore);
 
@@ -42,10 +43,16 @@ onMounted(() => {
             <div
                 v-if="isMenuOpen"
                 @click="isMenuOpen = false"
-                class="fixed inset-0 bg-black/30 z-10" aria-hidden="true"
+                class="fixed inset-0 bg-black/30 z-10 lg:hidden" aria-hidden="true"
             />
         </Transition>
-        <div class="flex flex-col flex-1">
+        <div
+            class="flex flex-col flex-1 w-full"
+            :class="{
+                'lg:ml-[20rem] transition-all ease-in-out': isMenuOpening,
+                'lg:ml-0': !isMenuOpening,
+            }"
+        >
             <header class="px-3 py-6 text-center bg-purple-500/[15%] backdrop-blur shadow">
                 <!-- Menu icon -->
                 <button
@@ -132,16 +139,5 @@ footer a {
 
 .fork-corner.fc-theme-github > i {
     @apply text-white/80;
-}
-
-.slide-leave-active,
-.slide-enter-active {
-    transition: 0.3s;
-}
-.slide-enter {
-    transform: translate(100%, 0);
-}
-.slide-leave-to {
-    transform: translate(-100%, 0);
 }
 </style>

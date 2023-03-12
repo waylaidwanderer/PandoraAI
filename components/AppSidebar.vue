@@ -6,6 +6,7 @@ const appStore = useAppStore();
 
 const {
     isMenuOpen,
+    isMenuOpening,
 } = storeToRefs(appStore);
 </script>
 
@@ -13,18 +14,20 @@ const {
     <div
         class="
             flex flex-col bg-purple-300/10 flex-1 max-w-xs shadow-lg
-            absolute top-0 left-0 h-full z-50 w-full backdrop-blur-lg
+            absolute top-0 left-0 h-screen z-50 w-full
+            backdrop-blur-lg
             transition-all duration-300 ease-in-out
         "
         :class="{
-            'translate-x-0': isMenuOpen,
+            'translate-x-0 absolute lg:static': isMenuOpen,
+            '!absolute': isMenuOpening,
             '-translate-x-full': !isMenuOpen,
         }"
     >
         <!-- close button -->
         <div
             v-if="isMenuOpen"
-            class="absolute top-0 right-0 -mr-4 bottom-0 flex items-center"
+            class="absolute top-0 right-0 -mr-4 bottom-0 flex items-center lg:hidden"
         >
             <button
                 @click="isMenuOpen = false"

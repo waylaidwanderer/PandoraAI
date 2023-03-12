@@ -352,7 +352,7 @@ if (!process.server) {
         </div>
         <div
             ref="inputContainerElement"
-            class="mx-auto w-full max-w-4xl px-3 lg:px-0 flex flex-row absolute left-0 right-0 mb-7 sm:mb-0 z-10"
+            class="mx-auto w-full max-w-4xl px-3 xl:px-0 flex flex-row absolute left-0 right-0 mb-7 sm:mb-0 z-10"
         >
             <div class="relative flex flex-row w-full justify-center items-stretch rounded shadow">
                 <div

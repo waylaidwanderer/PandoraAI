@@ -347,9 +347,11 @@ if (!process.server) {
         />
     </client-only>
     <div class="flex flex-col flex-grow items-center relative">
+        <!--suppress CssInvalidPropertyValue -->
         <div
             ref="messagesContainerElement"
             class="overflow-y-auto w-full rounded-sm pb-12 px-3 lg:px-0"
+            style="overflow: overlay;"
         >
             <TransitionGroup name="messages">
                 <div

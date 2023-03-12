@@ -1,7 +1,6 @@
 export const useAppStore = defineStore('appStore', () => {
-    const isMenuOpen = ref(true);
+    const isMenuOpen = ref(window.innerWidth > 1024);
     const isMenuOpening = ref(false);
-    const conversationTitle = ref('New Chat');
 
     watch(isMenuOpen, (value) => {
         if (value) {
@@ -15,7 +14,6 @@ export const useAppStore = defineStore('appStore', () => {
     return {
         isMenuOpen,
         isMenuOpening,
-        conversationTitle,
     };
 });
 

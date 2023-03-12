@@ -298,6 +298,12 @@ if (!process.server) {
             setChatContainerHeight();
         });
     });
+
+    watch(isClientDropdownOpen, () => {
+        nextTick(() => {
+            setChatContainerHeight();
+        });
+    });
 }
 </script>
 

@@ -5,14 +5,19 @@ import { storeToRefs } from 'pinia';
 import initForkCorner from '~/fork-corner';
 import AppSidebar from '~/components/AppSidebar.vue';
 import { useAppStore } from '~/stores/app';
+import { useConversationsStore } from '~/stores/conversations';
 
 const appStore = useAppStore();
+const conversationsStore = useConversationsStore();
 
 const {
     isMenuOpen,
     isMenuOpening,
-    conversationTitle,
 } = storeToRefs(appStore);
+
+const {
+    conversationTitle,
+} = storeToRefs(conversationsStore);
 
 useHead({
     title: `${conversationTitle.value} - PandoraAI`,

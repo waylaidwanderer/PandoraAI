@@ -12,14 +12,45 @@ const {
 
 const conversationsStore = useConversationsStore();
 const {
+    currentConversationId,
+    conversations,
+} = storeToRefs(conversationsStore);
+const {
     startNewConversation,
+    setCurrentConversationId,
+    deleteConversation,
+    clearConversations,
 } = conversationsStore;
+
+// sort conversations by updatedAt timestamp
+const sortedConversations = computed(() => Object.values(conversations.value).sort((a, b) => b.updatedAt - a.updatedAt));
+
+const isConfirmingClear = ref(false);
 
 const startNewConversationHandler = () => {
     startNewConversation();
     if (isMobileMenu.value) {
         isMenuOpen.value = false;
     }
+};
+
+const deleteConversationHandler = (conversationId) => {
+    deleteConversation(conversationId);
+    if (isMobileMenu.value) {
+        isMenuOpen.value = false;
+    }
+};
+
+const clearConversationsHandler = () => {
+    if (!isConfirmingClear.value) {
+        isConfirmingClear.value = setTimeout(() => {
+            isConfirmingClear.value = false;
+        }, 3000);
+        return;
+    }
+    clearConversations();
+    clearTimeout(isConfirmingClear.value);
+    isConfirmingClear.value = false;
 };
 </script>
 
@@ -57,12 +88,12 @@ const startNewConversationHandler = () => {
             </div>
         </Transition>
         <!-- Chat threads -->
-        <div class="flex-1 p-3">
+        <div class="p-3 pb-0">
             <!-- New Chat -->
             <button
                 @click="startNewConversationHandler"
                 class="
-                    flex flex-row items-center w-full bg-white/5 rounded-lg shadow p-3 mb-3
+                    flex flex-row items-center w-full bg-white/5 rounded shadow p-3 mb-3
                     transition duration-300 ease-in-out
                     hover:bg-white/10
                 "
@@ -74,49 +105,69 @@ const startNewConversationHandler = () => {
                 <Icon name="bx:bx-plus" class="w-8 h-8"/>
             </button>
         </div>
+        <!-- Conversations -->
+        <div
+            class="flex-1 flex flex-col gap-1 p-3 overflow-y-auto"
+        >
+            <TransitionGroup name="slide-from-left">
+                <div
+                    v-for="conversation in sortedConversations"
+                    :key="conversation.data.conversationId"
+                    class="flex flex-row items-stretch rounded p-3 pr-0 border-2 border-purple-300/5 hover:border-purple-300/10"
+                    :class="{ '!border-purple-300/20': conversation.data.conversationId === currentConversationId }"
+                >
+                    <button
+                        class="flex flex-col flex-1 text-left overflow-hidden"
+                        @click="setCurrentConversationId(conversation.data.conversationId)"
+                    >
+                        <span class="text-sm mb-1">
+                            {{ conversation.title || 'New Chat' }}
+                        </span>
+                        <span class="text-xs text-white/30 truncate">
+                            {{ conversation.data.conversationId }}
+                        </span>
+                        <span class="text-xs text-white/40">
+                            {{ (new Date(conversation.updatedAt)).toLocaleString() }}
+                        </span>
+                    </button>
+                    <button
+                        @click="deleteConversationHandler(conversation.data.conversationId)"
+                        class="flex items-center justify-center px-3 text-white/30 hover:text-white/60"
+                    >
+                        <Icon name="bx:bx-trash" class="w-4 h-4"/>
+                    </button>
+                </div>
+            </TransitionGroup>
+        </div>
         <!-- Sidebar footer -->
-        <div class="flex gap-2 bg-black/5 px-3 py-6">
-            <div class="flex gap-3 items-center justify-center w-full">
+        <div class="flex flex-col items-start gap-2 bg-black/5 p-6 min-h-[100px]">
+            <button
+                @click="clearConversationsHandler"
+                class="flex gap-1 items-center justify-center text-white/60 transition duration-300 hover:text-white/80"
+            >
+                <Icon :name="isConfirmingClear ? 'bx:bx-check' : 'bx:bx-trash'" class="w-4 h-4 relative top-px"/>
+                Clear all conversations{{ isConfirmingClear ? '?' : '' }}
+            </button>
+            <div class="flex gap-3 items-center w-full">
                 <AppData/>
             </div>
         </div>
     </div>
 </template>
 
-<style>
-:root {
-    --background: hsl(240, 80%, 10%);
+<style scoped>
+.slide-from-left-move,
+.slide-from-left-enter-active,
+.slide-from-left-leave-active {
+    transition: all 0.5s ease;
+}
+.slide-from-left-enter-from,
+.slide-from-left-leave-to {
+    transform: translateX(-320px);
+    opacity: 0;
 }
 
-body {
-    background: radial-gradient(
-        60vmax 60vmax at 0% 0%,
-        hsla(240, 100%, 2%, 0.9) 0%,
-        hsla(240, 100%, 2%, 0) 95%),
-    radial-gradient(
-        80vmax 50vmax at 110% -10%,
-        hsla(175, 100%, 60%, 0.9) 0%,
-        hsla(200, 100%, 50%, 0.5) 50%,
-        hsla(240, 100%, 50%, 0) 95%),
-    radial-gradient(
-        90vmax 50vmax at 50vmax 50vmax,
-        hsla(260, 100%, 60%, 0.9) 0%,
-        hsla(240, 100%, 60%, 0) 95%) var(--background);
+.slide-from-left-leave-active {
+    opacity: 0;
 }
-
-footer a {
-    @apply opacity-75 hover:opacity-100 transition duration-300 ease-in-out;
-    background: linear-gradient(to right, #37feff 0%, #bd7bff 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-.fork-corner.fc-theme-github + div {
-    @apply shadow bg-black/50 z-40;
-}
-
-.fork-corner.fc-theme-github > i {
-    @apply text-white/80;
-}
-
 </style>

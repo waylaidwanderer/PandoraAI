@@ -38,6 +38,7 @@ const {
 
 const conversationsStore = useConversationsStore();
 const {
+    newConversationCounter,
     currentConversation,
 } = storeToRefs(conversationsStore);
 const {
@@ -253,7 +254,7 @@ const sendMessage = async (input) => {
     } catch (err) {
         console.error('ERROR', err);
     } finally {
-        if (!processingController.value.signal.aborted) {
+        if (!processingController.value?.signal.aborted) {
             processingController.value.abort();
         }
         processingController.value = null;
@@ -329,10 +330,18 @@ if (!process.server) {
     });
 
     watch(currentConversation, () => {
-        if (!currentConversation.value) {
+        if (currentConversation.value) {
+            conversationData.value = currentConversation.value.data;
+            messages.value = currentConversation.value.messages;
+        } else {
             conversationData.value = {};
             messages.value = [];
         }
+    });
+
+    watch(newConversationCounter, () => {
+        conversationData.value = {};
+        messages.value = [];
     });
 }
 </script>
@@ -350,7 +359,7 @@ if (!process.server) {
         <!--suppress CssInvalidPropertyValue -->
         <div
             ref="messagesContainerElement"
-            class="overflow-y-auto w-full rounded-sm pb-12 px-3 lg:px-0"
+            class="overflow-y-auto w-full rounded-sm pb-12 px-3"
             style="overflow: overlay;"
         >
             <TransitionGroup name="messages">
@@ -513,15 +522,6 @@ if (!process.server) {
    animations can be calculated correctly. */
 .messages-leave-active {
     position: absolute;
-    opacity: 0;
-}
-
-.fade-enter-active,
-.fade-leave-active {
-    transition: opacity 0.15s ease-in-out;
-}
-.fade-enter-from,
-.fade-leave-to {
     opacity: 0;
 }
 

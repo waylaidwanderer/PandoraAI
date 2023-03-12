@@ -1,6 +1,7 @@
 export const useConversationsStore = defineStore('conversationsStore', () => {
+    const newConversationCounter = ref(0);
     const conversations = useLocalStorage('conversations', {});
-    const currentConversationId = useLocalStorage('lastConversationId', '');
+    const currentConversationId = ref('');
     const currentConversation = computed(() => {
         if (!currentConversationId.value) {
             return null;
@@ -8,8 +9,6 @@ export const useConversationsStore = defineStore('conversationsStore', () => {
         return conversations.value[currentConversationId.value] || null;
     });
     const conversationTitle = computed(() => currentConversation.value?.title || 'New Chat');
-
-    // TODO: only allow one conversation to be updated at a time
 
     function updateConversation(id, updatedConversationData, messages) {
         currentConversationId.value = id;
@@ -29,15 +28,36 @@ export const useConversationsStore = defineStore('conversationsStore', () => {
     }
 
     function startNewConversation() {
+        // this counter is really only meant for watcher to trigger updates
+        newConversationCounter.value += 1;
         currentConversationId.value = '';
     }
 
+    function setCurrentConversationId(id) {
+        currentConversationId.value = id;
+    }
+
+    function deleteConversation(id) {
+        delete conversations.value[id];
+        startNewConversation();
+    }
+
+    function clearConversations() {
+        conversations.value = {};
+        startNewConversation();
+    }
+
     return {
+        newConversationCounter,
+        conversations,
         currentConversationId,
         currentConversation,
         conversationTitle,
         updateConversation,
         startNewConversation,
+        setCurrentConversationId,
+        deleteConversation,
+        clearConversations,
     };
 });
 

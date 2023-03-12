@@ -134,6 +134,15 @@ footer a {
     -webkit-text-fill-color: transparent;
 }
 
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.15s ease-in-out;
+}
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0;
+}
+
 #fork-corner {
     z-index: 41;
 }

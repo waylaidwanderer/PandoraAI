@@ -38,6 +38,9 @@ const {
 
 const conversationsStore = useConversationsStore();
 const {
+    currentConversation,
+} = storeToRefs(conversationsStore);
+const {
     updateConversation,
 } = conversationsStore;
 
@@ -46,8 +49,8 @@ const isClientSettingsModalOpen = ref(false);
 const clientSettingsModalClient = ref(null);
 const clientSettingsModalPresetName = ref(null);
 
-const conversationData = ref({});
-const messages = ref([]);
+const conversationData = ref(currentConversation.value?.data || {});
+const messages = ref(currentConversation.value?.messages || []);
 const message = ref('');
 const processingController = ref(null);
 const suggestedResponses = ref([]);
@@ -74,6 +77,23 @@ const stopProcessing = () => {
     }
     processingController.value.abort();
     processingController.value = null;
+};
+
+const setChatContainerHeight = () => {
+    const headerElementHeight = document.querySelector('header').offsetHeight;
+    const footerElementHeight = document.querySelector('footer').offsetHeight;
+    const inputContainerElementHeight = inputContainerElement.value.offsetHeight;
+    const heightOffset = window.document.documentElement.clientHeight - window.innerHeight;
+    const containerHeight = window.document.documentElement.clientHeight
+        - (headerElementHeight + footerElementHeight)
+        - inputContainerElementHeight
+        - heightOffset
+        - 50;
+    // set container height
+    messagesContainerElement.value.style.height = `${containerHeight}px`;
+    // move input container element bottom down
+    inputContainerElement.value.style.bottom = `${heightOffset}px`;
+    scrollToBottom();
 };
 
 const sendMessage = async (input) => {
@@ -213,7 +233,9 @@ const sendMessage = async (input) => {
                     if (result.details.suggestedResponses) {
                         suggestedResponses.value = result.details.suggestedResponses.map(response => response.text);
                     }
-                    nextTick().then(() => scrollToBottom());
+                    nextTick(() => {
+                        setChatContainerHeight();
+                    });
                     return;
                 }
                 if (eventMessage.event === 'error') {
@@ -238,22 +260,6 @@ const sendMessage = async (input) => {
         await nextTick();
         inputTextElement.value.focus();
     }
-};
-
-const setChatContainerHeight = () => {
-    const headerElementHeight = document.querySelector('header').offsetHeight;
-    const footerElementHeight = document.querySelector('footer').offsetHeight;
-    const inputContainerElementHeight = inputContainerElement.value.offsetHeight;
-    const heightOffset = window.document.documentElement.clientHeight - window.innerHeight;
-    const containerHeight = window.document.documentElement.clientHeight
-        - (headerElementHeight + footerElementHeight)
-        - inputContainerElementHeight
-        - heightOffset;
-    // set container height
-    messagesContainerElement.value.style.height = `${containerHeight}px`;
-    // move input container element bottom down
-    inputContainerElement.value.style.bottom = `${heightOffset}px`;
-    scrollToBottom();
 };
 
 const parseMarkdown = (text, streaming = false) => {
@@ -299,7 +305,9 @@ const setIsClientSettingsModalOpen = (isOpen, client = null, presetName = null) 
 if (!process.server) {
     onMounted(() => {
         window.addEventListener('resize', setChatContainerHeight);
-        setChatContainerHeight();
+        nextTick(() => {
+            setChatContainerHeight();
+        });
     });
 
     onUnmounted(() => {
@@ -339,8 +347,8 @@ if (!process.server) {
             <TransitionGroup name="messages">
                 <div
                     class="max-w-4xl w-full mx-auto"
-                    v-for="message in messages"
-                    :key="message.id"
+                    v-for="(message, index) in messages"
+                    :key="index"
                 >
                     <div
                         class="p-3 rounded-sm"

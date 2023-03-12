@@ -1,17 +1,13 @@
 export const useConversationsStore = defineStore('conversationsStore', () => {
     const conversations = useLocalStorage('conversations', {});
     const currentConversationId = useLocalStorage('lastConversationId', '');
-    // `conversations` is an array of objects with an id property.
-    // Look up the conversation with the id that matches the lastConversationId.
-    const activeConversation = computed(() => {
+    const currentConversation = computed(() => {
         if (!currentConversationId.value) {
-            return {
-                data: {},
-            };
+            return null;
         }
-        return conversations.value[currentConversationId.value] || { data: {} };
+        return conversations.value[currentConversationId.value] || null;
     });
-    const conversationTitle = computed(() => activeConversation.value.title || 'New Chat');
+    const conversationTitle = computed(() => currentConversation.value?.title || 'New Chat');
 
     // TODO: only allow one conversation to be updated at a time
 
@@ -37,7 +33,8 @@ export const useConversationsStore = defineStore('conversationsStore', () => {
     }
 
     return {
-        activeConversation,
+        currentConversationId,
+        currentConversation,
         conversationTitle,
         updateConversation,
         startNewConversation,

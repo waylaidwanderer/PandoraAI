@@ -3,7 +3,6 @@ import { fetchEventSource } from '@microsoft/fetch-event-source';
 import { marked } from 'marked';
 import DOMPurify from 'isomorphic-dompurify';
 import hljs from 'highlight.js';
-import { v4 as uuidv4 } from 'uuid';
 import { storeToRefs } from 'pinia';
 import BingIcon from '~/components/Icons/BingIcon.vue';
 import GPTIcon from '~/components/Icons/GPTIcon.vue';
@@ -39,9 +38,6 @@ const {
 
 const conversationsStore = useConversationsStore();
 const {
-    activeConversation,
-} = storeToRefs(conversationsStore);
-const {
     updateConversation,
 } = conversationsStore;
 
@@ -50,6 +46,7 @@ const isClientSettingsModalOpen = ref(false);
 const clientSettingsModalClient = ref(null);
 const clientSettingsModalPresetName = ref(null);
 
+const conversationData = ref({});
 const messages = ref([]);
 const message = ref('');
 const processingController = ref(null);
@@ -59,7 +56,7 @@ const messagesContainerElement = ref(null);
 const inputContainerElement = ref(null);
 const inputTextElement = ref(null);
 
-const canChangePreset = computed(() => !processingController.value && Object.keys(activeConversation.value.data).length === 0);
+const canChangePreset = computed(() => !processingController.value && Object.keys(conversationData.value).length === 0);
 
 // compute number of rows for textarea based on message newlines, up to 7
 const inputRows = computed(() => {
@@ -96,24 +93,24 @@ const sendMessage = async (input) => {
 
     message.value = '';
 
-    const messageId = uuidv4();
-
-    messages.value.push({
-        id: messageId,
+    const userMessage = {
+        id: 'new',
+        parentMessageId: conversationData.value?.parentMessageId,
         text: input,
         role: 'user',
-    });
+    };
+    messages.value.push(userMessage);
 
-    messages.value.push({
-        id: uuidv4(),
+    let botMessage = {
+        id: 'bot-new',
         text: '',
         role: 'bot',
-    });
+    };
+    messages.value.push(botMessage);
+    botMessage = messages.value[messages.value.length - 1];
 
     await nextTick();
     scrollToBottom();
-
-    const botMessage = messages.value[messages.value.length - 1];
 
     let clientOptions;
     if (activePreset.value?.options.clientOptions) {
@@ -128,7 +125,7 @@ const sendMessage = async (input) => {
     }
 
     const data = {
-        ...activeConversation.value.data,
+        ...conversationData.value,
         message: input,
         stream: true,
         clientOptions,
@@ -138,7 +135,7 @@ const sendMessage = async (input) => {
         activePreset.value
         && activePreset.value.client === 'bing'
         && activePreset.value.options.jailbreakMode
-        && !activeConversation.value.data.jailbreakConversationId
+        && !conversationData.value.jailbreakConversationId
     ) {
         data.jailbreakConversationId = true;
     }
@@ -175,25 +172,36 @@ const sendMessage = async (input) => {
                 }
                 if (eventMessage.event === 'result') {
                     const result = JSON.parse(eventMessage.data);
+                    console.debug(result);
+                    userMessage.id = result.parentMessageId;
+                    botMessage.id = result.messageId;
+                    botMessage.parentMessageId = result.parentMessageId;
+                    let conversationId;
                     if (result.jailbreakConversationId) {
-                        updateConversation(result.jailbreakConversationId, {
+                        // Bing jailbreak mode
+                        conversationId = result.jailbreakConversationId;
+                        conversationData.value = {
                             jailbreakConversationId: result.jailbreakConversationId,
                             parentMessageId: result.messageId,
-                        });
+                        };
                     } else if (result.conversationSignature) {
-                        updateConversation(result.conversationId, {
+                        // Bing
+                        conversationId = result.conversationId;
+                        conversationData.value = {
                             conversationId: result.conversationId,
                             conversationSignature: result.conversationSignature,
                             clientId: result.clientId,
                             invocationId: result.invocationId,
-                        });
+                        };
                     } else {
-                        updateConversation(result.conversationId, {
+                        // other clients
+                        conversationId = result.conversationId;
+                        conversationData.value = {
                             conversationId: result.conversationId,
                             parentMessageId: result.messageId,
-                        });
+                        };
                     }
-                    console.debug(result);
+                    updateConversation(conversationId, conversationData.value, messages.value);
                     const adaptiveText = result.details.adaptiveCards?.[0]?.body?.[0]?.text?.trim();
                     if (adaptiveText) {
                         console.debug('adaptiveText', adaptiveText);

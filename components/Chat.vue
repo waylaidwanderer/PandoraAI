@@ -333,15 +333,20 @@ if (!process.server) {
         });
     });
 
-    watch(currentConversation, () => {
+    watch(currentConversation, (newData, oldData) => {
         if (currentConversation.value) {
             conversationData.value = currentConversation.value.data;
             messages.value = currentConversation.value.messages;
+            nextTick(() => {
+                scrollToBottom();
+            });
         } else {
             conversationData.value = {};
             messages.value = [];
         }
-        suggestedResponses.value = [];
+        if (newData?.id !== oldData?.id) {
+            suggestedResponses.value = [];
+        }
     });
 
     watch(newConversationCounter, () => {

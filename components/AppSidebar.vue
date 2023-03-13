@@ -1,6 +1,8 @@
 <script setup>
 import { storeToRefs } from 'pinia';
 import { useAppStore } from '~/stores/app';
+import BingIcon from '~/components/Icons/BingIcon.vue';
+import GPTIcon from '~/components/Icons/GPTIcon.vue';
 
 const appStore = useAppStore();
 const {
@@ -130,10 +132,22 @@ const clearConversationsHandler = () => {
                         :class="{ 'cursor-not-allowed': !!processingController }"
                     >
                         <span
-                            class="text-sm mb-1 truncate"
+                            class="text-sm mb-1 flex flex-row items-center gap-2 w-full"
                             :title="conversation.title"
                         >
-                            {{ conversation.title || 'New Chat' }}
+                            <GPTIcon
+                                v-if="(conversation.activePreset?.client || conversation.activePresetName) === 'chatgpt'"
+                                class="h-3 rounded-lg opacity-80"
+                            />
+                            <GPTIcon
+                                v-else-if="(conversation.activePreset?.client || conversation.activePresetName) === 'chatgpt-browser'"
+                                class="h-3 text-[#6ea194] rounded-lg opacity-80"
+                            />
+                            <BingIcon
+                                v-else-if="(conversation.activePreset?.client || conversation.activePresetName) === 'bing'"
+                                class="h-3 rounded-lg opacity-80"
+                            />
+                            <span class="flex-1 truncate">{{ conversation.title || 'New Chat' }}</span>
                         </span>
                         <span class="text-xs text-white/30 truncate">
                             {{ conversation.id }}

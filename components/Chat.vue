@@ -144,7 +144,7 @@ const sendMessage = async (input) => {
         };
     } else {
         clientOptions = {
-            clientToUse: activePresetNameToUse.value,
+            clientToUse: activePresetToUse.value?.client || activePresetNameToUse.value,
         };
     }
 

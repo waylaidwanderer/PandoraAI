@@ -23,6 +23,7 @@ export const useConversationsStore = defineStore('conversationsStore', () => {
         }
         conversations.value[id] = {
             data: updatedConversationData,
+            title: updatedConversationData.title || 'New Chat',
             messages,
             createdAt: Date.now(),
             updatedAt: Date.now(),

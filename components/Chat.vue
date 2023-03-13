@@ -223,6 +223,7 @@ const sendMessage = async (input) => {
                         conversationData.value = {
                             conversationId: result.conversationId,
                             parentMessageId: result.messageId,
+                            title: result.title,
                         };
                     }
                     const adaptiveText = result.details.adaptiveCards?.[0]?.body?.[0]?.text?.trim();

@@ -237,7 +237,6 @@ const sendMessage = async (input) => {
                     if (result.details.suggestedResponses) {
                         suggestedResponses.value = result.details.suggestedResponses.map(response => response.text);
                     }
-                    // TODO: store active preset too
                     updateConversation(conversationId, conversationData.value, messages.value, activePresetNameToUse.value, activePresetToUse.value);
                     nextTick(() => {
                         setChatContainerHeight();

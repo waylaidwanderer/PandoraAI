@@ -119,13 +119,13 @@ const clearConversationsHandler = () => {
             <TransitionGroup name="slide-from-left">
                 <div
                     v-for="conversation in sortedConversations"
-                    :key="conversation.data.conversationId"
+                    :key="conversation.id"
                     class="flex flex-row items-stretch rounded p-3 pr-0 border-2 border-purple-300/5 hover:border-purple-300/10"
-                    :class="{ '!border-purple-300/20': conversation.data.conversationId === currentConversationId }"
+                    :class="{ '!border-purple-300/20': conversation.id === currentConversationId }"
                 >
                     <button
                         class="flex flex-col flex-1 text-left overflow-hidden"
-                        @click="setCurrentConversationIdHandler(conversation.data.conversationId)"
+                        @click="setCurrentConversationIdHandler(conversation.id)"
                         :disabled="!!processingController"
                         :class="{ 'cursor-not-allowed': !!processingController }"
                     >
@@ -136,14 +136,14 @@ const clearConversationsHandler = () => {
                             {{ conversation.title || 'New Chat' }}
                         </span>
                         <span class="text-xs text-white/30 truncate">
-                            {{ conversation.data.conversationId }}
+                            {{ conversation.id }}
                         </span>
                         <span class="text-xs text-white/40">
                             {{ (new Date(conversation.updatedAt)).toLocaleString() }}
                         </span>
                     </button>
                     <button
-                        @click="deleteConversationHandler(conversation.data.conversationId)"
+                        @click="deleteConversationHandler(conversation.id)"
                         class="flex items-center justify-center px-3 text-white/30 hover:text-white/60"
                         :disabled="!!processingController"
                         :class="{ 'cursor-not-allowed': !!processingController }"

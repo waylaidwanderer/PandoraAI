@@ -1,6 +1,6 @@
 export const useConversationsStore = defineStore('conversationsStore', () => {
     const newConversationCounter = ref(0);
-    const conversations = useLocalStorage('conversations', {});
+    const conversations = useLocalStorage('conversations/v1', {});
     const currentConversationId = ref('');
     const processingController = ref(null);
 
@@ -22,6 +22,7 @@ export const useConversationsStore = defineStore('conversationsStore', () => {
             return;
         }
         conversations.value[id] = {
+            id,
             data: updatedConversationData,
             title: updatedConversationData.title || 'New Chat',
             messages,

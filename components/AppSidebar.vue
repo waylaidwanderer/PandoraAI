@@ -129,7 +129,10 @@ const clearConversationsHandler = () => {
                         :disabled="!!processingController"
                         :class="{ 'cursor-not-allowed': !!processingController }"
                     >
-                        <span class="text-sm mb-1">
+                        <span
+                            class="text-sm mb-1 truncate"
+                            :title="conversation.title"
+                        >
                             {{ conversation.title || 'New Chat' }}
                         </span>
                         <span class="text-xs text-white/30 truncate">

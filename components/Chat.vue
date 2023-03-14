@@ -116,6 +116,9 @@ const sendMessage = async (input) => {
 
     message.value = '';
 
+    // remove id === 'new' and id === 'bot-new' messages
+    messages.value = messages.value.filter(_message => !['new', 'bot-new'].includes(_message.id));
+
     const userMessage = {
         id: 'new',
         parentMessageId: conversationData.value?.parentMessageId,

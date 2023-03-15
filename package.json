@@ -13,7 +13,7 @@
     "vue": "latest"
   },
   "devDependencies": {
-    "@nuxtjs/tailwindcss": "^6.5.0",
+    "@nuxtjs/tailwindcss": "^6.6.0",
     "@tailwindcss/typography": "^0.5.9",
     "@vueuse/core": "^9.13.0",
     "@vueuse/nuxt": "^9.13.0",

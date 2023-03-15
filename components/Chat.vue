@@ -61,6 +61,7 @@ const suggestedResponses = ref([]);
 const messagesContainerElement = ref(null);
 const inputContainerElement = ref(null);
 const inputTextElement = ref(null);
+const chatButtonsContainerElement = ref(null);
 
 const canChangePreset = computed(() => !processingController.value && Object.keys(conversationData.value).length === 0);
 
@@ -86,11 +87,13 @@ const setChatContainerHeight = () => {
     const headerElementHeight = document.querySelector('header').offsetHeight;
     const footerElementHeight = document.querySelector('footer').offsetHeight;
     const inputContainerElementHeight = inputContainerElement.value.offsetHeight;
+    const chatButtonsContainerElementHeight = chatButtonsContainerElement.value.offsetHeight;
     const heightOffset = window.document.documentElement.clientHeight - window.innerHeight;
     const containerHeight = window.document.documentElement.clientHeight
         - (headerElementHeight + footerElementHeight)
         - inputContainerElementHeight
         - heightOffset
+        - chatButtonsContainerElementHeight
         - 50;
     // set container height
     messagesContainerElement.value.style.height = `${containerHeight}px`;
@@ -417,6 +420,7 @@ if (!process.server) {
         >
             <div class="relative flex flex-row w-full justify-center items-stretch rounded shadow">
                 <div
+                    ref="chatButtonsContainerElement"
                     class="flex gap-2 mb-3 items-stretch justify-center absolute bottom-full"
                     :class="{ 'w-full': !processingController }"
                 >

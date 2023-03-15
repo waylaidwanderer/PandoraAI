@@ -51,17 +51,17 @@ const isClientSettingsModalOpen = ref(false);
 const clientSettingsModalClient = ref(null);
 const clientSettingsModalPresetName = ref(null);
 
+const messagesContainerElement = ref(null);
+const inputContainerElement = ref(null);
+const inputTextElement = ref(null);
+const chatButtonsContainerElement = ref(null);
+
 const activePresetNameToUse = computed(() => currentConversation.value?.activePresetName || activePresetName.value);
 const activePresetToUse = computed(() => currentConversation.value?.activePreset || activePreset.value);
 const conversationData = ref(currentConversation.value?.data || {});
 const messages = ref(currentConversation.value?.messages || []);
 const message = ref('');
 const suggestedResponses = ref([]);
-
-const messagesContainerElement = ref(null);
-const inputContainerElement = ref(null);
-const inputTextElement = ref(null);
-const chatButtonsContainerElement = ref(null);
 
 const canChangePreset = computed(() => !processingController.value && Object.keys(conversationData.value).length === 0);
 

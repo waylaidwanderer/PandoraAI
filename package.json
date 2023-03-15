@@ -13,7 +13,7 @@
     "vue": "latest"
   },
   "devDependencies": {
-    "@nuxtjs/tailwindcss": "^6.4.1",
+    "@nuxtjs/tailwindcss": "^6.6.0",
     "@tailwindcss/typography": "^0.5.9",
     "@vueuse/core": "^9.13.0",
     "@vueuse/nuxt": "^9.13.0",
@@ -21,8 +21,8 @@
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.27.5",
     "eslint-plugin-vue": "^9.9.0",
-    "nuxt": "^3.2.3",
-    "nuxt-icon": "^0.3.2"
+    "nuxt": "^3.3.1",
+    "nuxt-icon": "^0.3.3"
   },
   "dependencies": {
     "@headlessui/vue": "^1.7.12",
@@ -30,7 +30,7 @@
     "@pinia/nuxt": "^0.4.7",
     "fork-corner": "^2.0.1",
     "highlight.js": "^11.7.0",
-    "isomorphic-dompurify": "^1.1.0",
+    "isomorphic-dompurify": "^1.2.0",
     "lodash": "^4.17.21",
     "marked": "^4.2.12",
     "pinia": "^2.0.33",

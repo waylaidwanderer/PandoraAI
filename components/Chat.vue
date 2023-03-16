@@ -554,7 +554,7 @@ if (!process.server) {
 }
 
 .message {
-    -webkit-transform: translateZ(0);
+    -webkit-transform: matrix(1.0, 0.0, 0.0, 1.0, 0.00, 0.01);
 }
 
 .prose pre {

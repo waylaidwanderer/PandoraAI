@@ -381,7 +381,7 @@ if (!process.server) {
         >
             <TransitionGroup name="messages">
                 <div
-                    class="max-w-4xl w-full mx-auto"
+                    class="max-w-4xl w-full mx-auto message"
                     v-for="(message, index) in messages"
                     :key="index"
                 >
@@ -551,6 +551,10 @@ if (!process.server) {
 .slide-from-bottom-leave-to {
     transform: translateY(30px);
     opacity: 0;
+}
+
+.message {
+    -webkit-transform: translateZ(0);
 }
 
 .prose pre {

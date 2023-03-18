@@ -31,6 +31,11 @@ const props = defineProps({
 
 const availableOptions = {
     chatgpt: {
+        stream: {
+            type: 'checkbox',
+            label: 'Stream',
+            default: true,
+        },
         clientOptions: {
             type: 'nested',
             label: 'Client Options',
@@ -114,6 +119,11 @@ const availableOptions = {
         },
     },
     'chatgpt-browser': {
+        stream: {
+            type: 'checkbox',
+            label: 'Stream',
+            default: true,
+        },
         clientOptions: {
             type: 'nested',
             label: 'Client Options',
@@ -134,6 +144,11 @@ const availableOptions = {
         },
     },
     bing: {
+        stream: {
+            type: 'checkbox',
+            label: 'Stream',
+            default: true,
+        },
         jailbreakMode: {
             type: 'checkbox',
             label: 'Jailbreak Mode',
@@ -230,7 +245,7 @@ const generateForm = (options, parentKey, levels = 0) => Object.entries(options)
             classList = `${classList} shadow-inner bg-white/5 px-3`;
             break;
     }
-    const inputValue = get(formClientOptions.value, optionKey);
+    const inputValue = get(formClientOptions.value, optionKey, option.default);
     let inputElement;
     switch (option.type) {
         case 'textarea':
@@ -267,7 +282,6 @@ const generateForm = (options, parentKey, levels = 0) => Object.entries(options)
                 value: inputValue,
                 onChange: (e) => {
                     const targetValue = e.target.value;
-                    console.log(targetValue);
                     if (!targetValue) {
                         unset(formClientOptions.value, optionKey);
                     } else {
@@ -277,7 +291,7 @@ const generateForm = (options, parentKey, levels = 0) => Object.entries(options)
                 class: classList,
             }, [
                 h('option', { value: '' }, 'default server value'),
-                ...option.options.map((option) => h('option', { value: option.value }, option.label)),
+                ...option.options.map(_option => h('option', { value: _option.value }, _option.label)),
             ]);
             break;
         default:

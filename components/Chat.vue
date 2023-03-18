@@ -167,7 +167,12 @@ const sendMessage = async (input) => {
         && activePresetToUse.value.options.jailbreakMode
         && !conversationData.value.jailbreakConversationId
     ) {
-        data.jailbreakConversationId = true;
+        if (activePresetToUse.value.options.jailbreakMode && !conversationData.value.jailbreakConversationId) {
+            data.jailbreakConversationId = true;
+        }
+        if (activePresetToUse.value.options.toneStyle) {
+            data.toneStyle = activePresetToUse.value.options.toneStyle;
+        }
     }
 
     const opts = {

@@ -138,6 +138,24 @@ const availableOptions = {
             type: 'checkbox',
             label: 'Jailbreak Mode',
         },
+        toneStyle: {
+            type: 'select',
+            label: 'Tone Style',
+            options: [
+                {
+                    label: 'Creative',
+                    value: 'creative',
+                },
+                {
+                    label: 'Balanced',
+                    value: 'balanced',
+                },
+                {
+                    label: 'Precise',
+                    value: 'precise',
+                },
+            ],
+        },
         clientOptions: {
             type: 'nested',
             label: 'Client Options',
@@ -242,6 +260,24 @@ const generateForm = (options, parentKey, levels = 0) => Object.entries(options)
                 h('span', {
                     class: `inline-block h-4 w-4 transform rounded-full bg-white transition ${inputValue ? 'translate-x-6' : 'translate-x-1'}`,
                 }),
+            ]);
+            break;
+        case 'select':
+            inputElement = h('select', {
+                value: inputValue,
+                onChange: (e) => {
+                    const targetValue = e.target.value;
+                    console.log(targetValue);
+                    if (!targetValue) {
+                        unset(formClientOptions.value, optionKey);
+                    } else {
+                        set(formClientOptions.value, optionKey, targetValue);
+                    }
+                },
+                class: classList,
+            }, [
+                h('option', { value: '' }, 'default server value'),
+                ...option.options.map((option) => h('option', { value: option.value }, option.label)),
             ]);
             break;
         default:
@@ -429,3 +465,9 @@ watch(() => props.client, (client) => {
         </div>
     </Dialog>
 </template>
+
+<style>
+select option {
+    @apply text-slate-700;
+}
+</style>

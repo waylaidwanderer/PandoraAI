@@ -78,7 +78,7 @@ const regenerateData = computed(() => {
     const lastBotMessage = messages.value[lastUserMessageIndex + 1];
     return {
         input: lastUserMessage.text,
-        parentMessageId: lastUserMessage.parentMessageId,
+        parentMessageId: lastUserMessage.parentMessageId || false,
         userMessageIndex: lastUserMessageIndex,
         botMessageIndex: lastUserMessageIndex + 1,
         canRegenerate: typeof lastBotMessage?.parentMessageId !== 'undefined' && lastBotMessage?.parentMessageId !== null,
@@ -329,7 +329,6 @@ const sendMessage = async (input, parentMessageId = null) => {
                     nextTick().then(() => setChatContainerHeight());
                     return;
                 }
-                console.log(messages.value[botMessageIndex].text);
                 messages.value[botMessageIndex].text += JSON.parse(eventMessage.data);
                 nextTick().then(() => scrollToBottom());
             },
@@ -429,7 +428,6 @@ if (!process.server) {
     watch(currentConversation, (newData, oldData) => {
         if (currentConversation.value) {
             conversationData.value = currentConversation.value.data;
-            messages.value = currentConversation.value.messages;
             nextTick(() => {
                 scrollToBottom();
             });
@@ -439,6 +437,9 @@ if (!process.server) {
         }
         if (newData?.id !== oldData?.id) {
             suggestedResponses.value = [];
+            if (currentConversation.value) {
+                messages.value = currentConversation.value.messages;
+            }
         }
     });
 

@@ -169,8 +169,6 @@ const sendMessage = async (input) => {
     if (
         activePresetToUse.value
         && activePresetToUse.value.client === 'bing'
-        && activePresetToUse.value.options.jailbreakMode
-        && !conversationData.value.jailbreakConversationId
     ) {
         if (activePresetToUse.value.options.jailbreakMode && !conversationData.value.jailbreakConversationId) {
             data.jailbreakConversationId = true;

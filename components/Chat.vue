@@ -135,7 +135,6 @@ const sendMessage = async (input, parentMessageId = null) => {
     }
 
     if (parentMessageId !== null) {
-        console.log(JSON.stringify(messages.value, null, 2));
         messages.value = getMessagesForConversation(messages.value, parentMessageId);
         if (parentMessageId === false) {
             delete conversationData.value.parentMessageId;
@@ -169,7 +168,6 @@ const sendMessage = async (input, parentMessageId = null) => {
     };
     messages.value.push(botMessage);
     const botMessageIndex = messages.value.length - 1;
-    console.log(JSON.stringify(messages.value, null, 2));
 
     await nextTick();
     scrollToBottom();
@@ -470,8 +468,8 @@ if (!process.server) {
             <TransitionGroup name="messages">
                 <div
                     class="max-w-4xl w-full mx-auto message"
-                    v-for="message in messages"
-                    :key="message.id"
+                    v-for="(message, index) in messages"
+                    :key="message.id || index"
                 >
                     <div
                         class="p-3 rounded-sm"

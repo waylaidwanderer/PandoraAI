@@ -51,17 +51,39 @@ const isClientSettingsModalOpen = ref(false);
 const clientSettingsModalClient = ref(null);
 const clientSettingsModalPresetName = ref(null);
 
+const messagesContainerElement = ref(null);
+const inputContainerElement = ref(null);
+const inputTextElement = ref(null);
+const chatButtonsContainerElement = ref(null);
+
 const activePresetNameToUse = computed(() => currentConversation.value?.activePresetName || activePresetName.value);
 const activePresetToUse = computed(() => currentConversation.value?.activePreset || activePreset.value);
 const conversationData = ref(currentConversation.value?.data || {});
 const messages = ref(currentConversation.value?.messages || []);
 const message = ref('');
 const suggestedResponses = ref([]);
-
-const messagesContainerElement = ref(null);
-const inputContainerElement = ref(null);
-const inputTextElement = ref(null);
-const chatButtonsContainerElement = ref(null);
+const regenerateData = computed(() => {
+    if (!messages.value.length) {
+        return {};
+    }
+    // find last index message where role = user
+    const lastUserMessageIndex = messages.value
+        .map(_message => _message.role)
+        .lastIndexOf('user');
+    if (lastUserMessageIndex === -1) {
+        // this should never happen
+        return {};
+    }
+    const lastUserMessage = messages.value[lastUserMessageIndex];
+    const lastBotMessage = messages.value[lastUserMessageIndex + 1];
+    return {
+        input: lastUserMessage.text,
+        parentMessageId: lastUserMessage.parentMessageId || false,
+        userMessageIndex: lastUserMessageIndex,
+        botMessageIndex: lastUserMessageIndex + 1,
+        canRegenerate: typeof lastBotMessage?.parentMessageId !== 'undefined' && lastBotMessage?.parentMessageId !== null,
+    };
+});
 
 const canChangePreset = computed(() => !processingController.value && Object.keys(conversationData.value).length === 0);
 
@@ -102,7 +124,7 @@ const setChatContainerHeight = () => {
     scrollToBottom();
 };
 
-const sendMessage = async (input) => {
+const sendMessage = async (input, parentMessageId = null) => {
     if (processingController.value) {
         return;
     }
@@ -112,11 +134,18 @@ const sendMessage = async (input) => {
         return;
     }
 
-    isClientDropdownOpen.value = false;
+    if (parentMessageId !== null) {
+        messages.value = getMessagesForConversation(messages.value, parentMessageId);
+        if (parentMessageId === false) {
+            delete conversationData.value.parentMessageId;
+        } else {
+            conversationData.value.parentMessageId = parentMessageId;
+        }
+    }
 
+    isClientDropdownOpen.value = false;
     suggestedResponses.value = [];
     processingController.value = new AbortController();
-
     message.value = '';
 
     // remove id === 'new' and id === 'bot-new' messages
@@ -124,7 +153,7 @@ const sendMessage = async (input) => {
 
     const userMessage = {
         id: 'new',
-        parentMessageId: conversationData.value?.parentMessageId,
+        parentMessageId: conversationData.value?.parentMessageId || false,
         text: input,
         role: 'user',
     };
@@ -133,6 +162,7 @@ const sendMessage = async (input) => {
 
     const botMessage = {
         id: 'bot-new',
+        parentMessageId: 'new',
         text: '',
         role: 'bot',
     };
@@ -207,6 +237,7 @@ const sendMessage = async (input) => {
                 conversationSignature: result.conversationSignature,
                 clientId: result.clientId,
                 invocationId: result.invocationId,
+                parentMessageId: null,
             };
         } else {
             // other clients
@@ -352,6 +383,20 @@ const setIsClientSettingsModalOpen = (isOpen, client = null, presetName = null) 
     clientSettingsModalPresetName.value = presetName || client;
 };
 
+function getMessagesForConversation(conversationMessages, parentMessageId, conversationOrderedMessages = []) {
+    // Check if parent message id is valid
+    if (parentMessageId) {
+        // Find the message object that matches parent message id asynchronously
+        const conversationMessage = conversationMessages.find(m => m.id === parentMessageId);
+        // Push it to ordered messages array
+        conversationOrderedMessages.unshift(conversationMessage);
+        // Call getMessagesForConversation again with parent message id and ordered messages as arguments
+        return getMessagesForConversation(conversationMessages, conversationMessage.parentMessageId, conversationOrderedMessages);
+    }
+    // Return ordered messages array as final result
+    return conversationOrderedMessages;
+}
+
 if (!process.server) {
     onMounted(() => {
         window.addEventListener('resize', setChatContainerHeight);
@@ -381,7 +426,6 @@ if (!process.server) {
     watch(currentConversation, (newData, oldData) => {
         if (currentConversation.value) {
             conversationData.value = currentConversation.value.data;
-            messages.value = currentConversation.value.messages;
             nextTick(() => {
                 scrollToBottom();
             });
@@ -391,6 +435,9 @@ if (!process.server) {
         }
         if (newData?.id !== oldData?.id) {
             suggestedResponses.value = [];
+            if (currentConversation.value) {
+                messages.value = currentConversation.value.messages;
+            }
         }
     });
 
@@ -422,7 +469,7 @@ if (!process.server) {
                 <div
                     class="max-w-4xl w-full mx-auto message"
                     v-for="(message, index) in messages"
-                    :key="index"
+                    :key="message.id || index"
                 >
                     <div
                         class="p-3 rounded-sm"
@@ -547,6 +594,26 @@ if (!process.server) {
                     }"
                 />
                 <button
+                    v-if="
+                        !message
+                        && regenerateData.canRegenerate
+                        && typeof regenerateData.parentMessageId !== 'undefined'
+                        && regenerateData.parentMessageId !== null
+                        && !processingController
+                    "
+                    @click="sendMessage(regenerateData.input, regenerateData.parentMessageId)"
+                    title="Regenerate"
+                    class="
+                        flex items-center flex-1
+                        px-4 text-slate-300 bg-white/5 backdrop-blur-sm
+                        transition duration-300 ease-in-out
+                        hover:bg-white/10 hover:backdrop-blur-sm
+                    "
+                >
+                    <Icon name="bx:bx-refresh" class="w-7 h-7"/>
+                </button>
+                <button
+                    v-else
                     @click="sendMessage(message)"
                     :disabled="!!processingController"
                     class="

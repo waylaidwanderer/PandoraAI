@@ -186,10 +186,15 @@ const sendMessage = async (input, parentMessageId = null) => {
         };
     }
 
+    let stream = true;
+    if (typeof activePresetToUse.value?.options?.stream !== 'undefined') {
+        stream = activePresetToUse.value?.options?.stream;
+    }
+
     const data = {
         ...conversationData.value,
         message: input,
-        stream: true,
+        stream,
         clientOptions,
     };
 
@@ -199,7 +204,12 @@ const sendMessage = async (input, parentMessageId = null) => {
         && activePresetToUse.value.options.jailbreakMode
         && !conversationData.value.jailbreakConversationId
     ) {
-        data.jailbreakConversationId = true;
+        if (activePresetToUse.value.options.jailbreakMode && !conversationData.value.jailbreakConversationId) {
+            data.jailbreakConversationId = true;
+        }
+        if (activePresetToUse.value.options.toneStyle) {
+            data.toneStyle = activePresetToUse.value.options.toneStyle;
+        }
     }
 
     const opts = {
@@ -209,6 +219,82 @@ const sendMessage = async (input, parentMessageId = null) => {
         },
         body: JSON.stringify(data),
     };
+
+    const handleMessageResult = (result) => {
+        console.debug(result);
+        messages.value[userMessageIndex].id = result.parentMessageId;
+        messages.value[botMessageIndex].id = result.messageId;
+        messages.value[botMessageIndex].parentMessageId = result.parentMessageId;
+        let conversationId;
+        if (result.jailbreakConversationId) {
+            // Bing jailbreak mode
+            conversationId = result.jailbreakConversationId;
+            conversationData.value = {
+                jailbreakConversationId: result.jailbreakConversationId,
+                parentMessageId: result.messageId,
+            };
+        } else if (result.conversationSignature) {
+            // Bing
+            conversationId = result.conversationId;
+            conversationData.value = {
+                conversationId: result.conversationId,
+                conversationSignature: result.conversationSignature,
+                clientId: result.clientId,
+                invocationId: result.invocationId,
+                parentMessageId: null,
+            };
+        } else {
+            // other clients
+            conversationId = result.conversationId;
+            conversationData.value = {
+                conversationId: result.conversationId,
+                parentMessageId: result.messageId,
+                title: result.title,
+            };
+        }
+        const adaptiveText = result.details.adaptiveCards?.[0]?.body?.[0]?.text?.trim();
+        if (adaptiveText) {
+            console.debug('adaptiveText', adaptiveText);
+            messages.value[botMessageIndex].text = adaptiveText;
+        } else {
+            messages.value[botMessageIndex].text = result.response;
+        }
+        messages.value[botMessageIndex].raw = result;
+        if (result.details.suggestedResponses) {
+            suggestedResponses.value = result.details.suggestedResponses.map(response => response.text);
+        }
+        updateConversation(conversationId, conversationData.value, messages.value, activePresetNameToUse.value, activePresetToUse.value);
+        nextTick().then(() => {
+            setChatContainerHeight();
+            inputTextElement.value.focus();
+        });
+    };
+
+    if (!stream) {
+        const result = await fetch(`${config.apiBaseUrl}/conversation`, {
+            ...opts,
+            signal: processingController.value.signal,
+        });
+
+        processingController.value = null;
+
+        if (result.status === 200) {
+            const json = await result.json();
+            handleMessageResult(json);
+        } else {
+            let errorData = await result.text();
+
+            messages.value[botMessageIndex].error = true;
+            messages.value[botMessageIndex].raw = errorData;
+            try {
+                errorData = JSON.parse(errorData);
+                messages.value[botMessageIndex].text = errorData.error || 'An error occurred. Please try again.';
+            } catch {
+                messages.value[botMessageIndex].text = `\`\`\`\n${errorData.toString().trim()}\n\`\`\``;
+            }
+        }
+        return;
+    }
 
     try {
         await fetchEventSource(`${config.apiBaseUrl}/conversation`, {
@@ -234,60 +320,15 @@ const sendMessage = async (input, parentMessageId = null) => {
                 }
                 if (eventMessage.event === 'result') {
                     const result = JSON.parse(eventMessage.data);
-                    console.debug(result);
-                    messages.value[userMessageIndex].id = result.parentMessageId;
-                    messages.value[botMessageIndex].id = result.messageId;
-                    messages.value[botMessageIndex].parentMessageId = result.parentMessageId;
-                    let conversationId;
-                    if (result.jailbreakConversationId) {
-                        // Bing jailbreak mode
-                        conversationId = result.jailbreakConversationId;
-                        conversationData.value = {
-                            jailbreakConversationId: result.jailbreakConversationId,
-                            parentMessageId: result.messageId,
-                        };
-                    } else if (result.conversationSignature) {
-                        // Bing
-                        conversationId = result.conversationId;
-                        conversationData.value = {
-                            conversationId: result.conversationId,
-                            conversationSignature: result.conversationSignature,
-                            clientId: result.clientId,
-                            invocationId: result.invocationId,
-                            parentMessageId: null,
-                        };
-                    } else {
-                        // other clients
-                        conversationId = result.conversationId;
-                        conversationData.value = {
-                            conversationId: result.conversationId,
-                            parentMessageId: result.messageId,
-                            title: result.title,
-                        };
-                    }
-                    const adaptiveText = result.details.adaptiveCards?.[0]?.body?.[0]?.text?.trim();
-                    if (adaptiveText) {
-                        console.debug('adaptiveText', adaptiveText);
-                        messages.value[botMessageIndex].text = adaptiveText;
-                    } else {
-                        messages.value[botMessageIndex].text = result.response;
-                    }
-                    messages.value[botMessageIndex].raw = result;
-                    if (result.details.suggestedResponses) {
-                        suggestedResponses.value = result.details.suggestedResponses.map(response => response.text);
-                    }
-                    updateConversation(conversationId, conversationData.value, messages.value, activePresetNameToUse.value, activePresetToUse.value);
-                    nextTick(() => {
-                        setChatContainerHeight();
-                    });
+                    handleMessageResult(result);
                     return;
                 }
                 if (eventMessage.event === 'error') {
                     const eventMessageData = JSON.parse(eventMessage.data);
-                    messages.value[botMessageIndex].text = eventMessageData.error || 'An error occurred. Please try again.';
+                    messages.value[botMessageIndex].text = eventMessageData.error ? `\`\`\`\n${eventMessageData.error.toString().trim()}\n\`\`\`` : 'An error occurred. Please try again.';
                     messages.value[botMessageIndex].error = true;
                     messages.value[botMessageIndex].raw = eventMessageData;
-                    nextTick().then(() => scrollToBottom());
+                    nextTick().then(() => setChatContainerHeight());
                     return;
                 }
                 console.log(messages.value[botMessageIndex].text);
@@ -429,7 +470,7 @@ if (!process.server) {
         >
             <TransitionGroup name="messages">
                 <div
-                    class="max-w-4xl w-full mx-auto"
+                    class="max-w-4xl w-full mx-auto message"
                     v-for="message in messages"
                     :key="message.id"
                 >
@@ -619,6 +660,10 @@ if (!process.server) {
 .slide-from-bottom-leave-to {
     transform: translateY(30px);
     opacity: 0;
+}
+
+.message {
+    -webkit-transform: matrix(1.0, 0.0, 0.0, 1.0, 0.00, 0.01);
 }
 
 .prose pre {

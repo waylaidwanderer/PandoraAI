@@ -31,6 +31,11 @@ const props = defineProps({
 
 const availableOptions = {
     chatgpt: {
+        stream: {
+            type: 'checkbox',
+            label: 'Stream',
+            default: true,
+        },
         clientOptions: {
             type: 'nested',
             label: 'Client Options',
@@ -114,6 +119,11 @@ const availableOptions = {
         },
     },
     'chatgpt-browser': {
+        stream: {
+            type: 'checkbox',
+            label: 'Stream',
+            default: true,
+        },
         clientOptions: {
             type: 'nested',
             label: 'Client Options',
@@ -134,9 +144,32 @@ const availableOptions = {
         },
     },
     bing: {
+        stream: {
+            type: 'checkbox',
+            label: 'Stream',
+            default: true,
+        },
         jailbreakMode: {
             type: 'checkbox',
             label: 'Jailbreak Mode',
+        },
+        toneStyle: {
+            type: 'select',
+            label: 'Tone Style',
+            options: [
+                {
+                    label: 'Creative',
+                    value: 'creative',
+                },
+                {
+                    label: 'Balanced',
+                    value: 'balanced',
+                },
+                {
+                    label: 'Precise',
+                    value: 'precise',
+                },
+            ],
         },
         clientOptions: {
             type: 'nested',
@@ -212,7 +245,7 @@ const generateForm = (options, parentKey, levels = 0) => Object.entries(options)
             classList = `${classList} shadow-inner bg-white/5 px-3`;
             break;
     }
-    const inputValue = get(formClientOptions.value, optionKey);
+    const inputValue = get(formClientOptions.value, optionKey, option.default);
     let inputElement;
     switch (option.type) {
         case 'textarea':
@@ -242,6 +275,23 @@ const generateForm = (options, parentKey, levels = 0) => Object.entries(options)
                 h('span', {
                     class: `inline-block h-4 w-4 transform rounded-full bg-white transition ${inputValue ? 'translate-x-6' : 'translate-x-1'}`,
                 }),
+            ]);
+            break;
+        case 'select':
+            inputElement = h('select', {
+                value: inputValue,
+                onChange: (e) => {
+                    const targetValue = e.target.value;
+                    if (!targetValue) {
+                        unset(formClientOptions.value, optionKey);
+                    } else {
+                        set(formClientOptions.value, optionKey, targetValue);
+                    }
+                },
+                class: classList,
+            }, [
+                h('option', { value: '' }, 'default server value'),
+                ...option.options.map(_option => h('option', { value: _option.value }, _option.label)),
             ]);
             break;
         default:
@@ -429,3 +479,9 @@ watch(() => props.client, (client) => {
         </div>
     </Dialog>
 </template>
+
+<style>
+select option {
+    @apply text-slate-700;
+}
+</style>

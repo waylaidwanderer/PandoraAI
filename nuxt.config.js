@@ -28,6 +28,7 @@ export default defineNuxtConfig({
     pwa: {
         icon: {
             source: './public/icon.png',
+            maskablePadding: 0,
         },
         meta: {
             name: 'PandoraAI',

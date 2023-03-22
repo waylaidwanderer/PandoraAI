@@ -65,6 +65,13 @@ export const useConversationsStore = defineStore('conversationsStore', () => {
         startNewConversation();
     }
 
+    function updateConversationTitle(id, title) {
+        const conversation = conversations.value[id];
+        if (conversation) {
+            conversation.title = title.trim();
+        }
+    }
+
     return {
         processingController,
         newConversationCounter,
@@ -77,6 +84,7 @@ export const useConversationsStore = defineStore('conversationsStore', () => {
         setCurrentConversationId,
         deleteConversation,
         clearConversations,
+        updateConversationTitle,
     };
 });
 

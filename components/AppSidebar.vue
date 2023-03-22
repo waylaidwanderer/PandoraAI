@@ -23,12 +23,16 @@ const {
     setCurrentConversationId,
     deleteConversation,
     clearConversations,
+    updateConversationTitle,
 } = conversationsStore;
 
 // sort conversations by updatedAt timestamp
 const sortedConversations = computed(() => Object.values(conversations.value).sort((a, b) => b.updatedAt - a.updatedAt));
 
 const isConfirmingClear = ref(false);
+const conversationTitleToEditId = ref(null);
+const conversationTitleToEditInput = ref(null);
+const conversationTitleToEditValue = ref('');
 
 const startNewConversationHandler = () => {
     startNewConversation();
@@ -38,6 +42,9 @@ const startNewConversationHandler = () => {
 };
 
 const setCurrentConversationIdHandler = (conversationId) => {
+    if (processingController.value) {
+        return;
+    }
     setCurrentConversationId(conversationId);
     if (isMobileMenu.value) {
         isMenuOpen.value = false;
@@ -58,6 +65,26 @@ const clearConversationsHandler = () => {
     clearConversations();
     clearTimeout(isConfirmingClear.value);
     isConfirmingClear.value = false;
+};
+
+const startEditConversationTitle = (id, event) => {
+    event.stopPropagation();
+    conversationTitleToEditId.value = id;
+    nextTick(() => {
+        conversationTitleToEditInput.value[0].focus();
+    });
+};
+
+const cancelEditConversationTitle = (event) => {
+    event.stopPropagation();
+    conversationTitleToEditId.value = null;
+    conversationTitleToEditValue.value = '';
+};
+
+const updateConversationTitleHandler = (event) => {
+    event.stopPropagation();
+    updateConversationTitle(conversationTitleToEditId.value, conversationTitleToEditValue.value);
+    cancelEditConversationTitle(event);
 };
 </script>
 
@@ -125,29 +152,76 @@ const clearConversationsHandler = () => {
                     class="flex flex-row items-stretch rounded p-3 pr-0 border-2 border-purple-300/5 hover:border-purple-300/10"
                     :class="{ '!border-purple-300/20': conversation.id === currentConversationId }"
                 >
-                    <button
+                    <div
                         class="flex flex-col flex-1 text-left overflow-hidden"
                         @click="setCurrentConversationIdHandler(conversation.id)"
-                        :disabled="!!processingController"
-                        :class="{ 'cursor-not-allowed': !!processingController }"
+                        :class="{
+                            'cursor-not-allowed': !!processingController,
+                            'cursor-pointer': !processingController,
+                        }"
                     >
                         <span
                             class="text-sm mb-1 flex flex-row items-center gap-2 w-full"
                             :title="conversation.title"
                         >
-                            <GPTIcon
-                                v-if="(conversation.activePreset?.client || conversation.activePresetName) === 'chatgpt'"
-                                class="h-3 rounded-lg opacity-80"
-                            />
-                            <GPTIcon
-                                v-else-if="(conversation.activePreset?.client || conversation.activePresetName) === 'chatgpt-browser'"
-                                class="h-3 text-[#6ea194] rounded-lg opacity-80"
-                            />
-                            <BingIcon
-                                v-else-if="(conversation.activePreset?.client || conversation.activePresetName) === 'bing'"
-                                class="h-3 rounded-lg opacity-80"
-                            />
-                            <span class="flex-1 truncate">{{ conversation.title || 'New Chat' }}</span>
+                            <span>
+                                <GPTIcon
+                                    v-if="(conversation.activePreset?.client || conversation.activePresetName) === 'chatgpt'"
+                                    class="h-3 rounded-lg opacity-80"
+                                />
+                                <GPTIcon
+                                    v-else-if="(conversation.activePreset?.client || conversation.activePresetName) === 'chatgpt-browser'"
+                                    class="h-3 text-[#6ea194] rounded-lg opacity-80"
+                                />
+                                <BingIcon
+                                    v-else-if="(conversation.activePreset?.client || conversation.activePresetName) === 'bing'"
+                                    class="h-3 rounded-lg opacity-80"
+                                />
+                            </span>
+                            <span
+                                v-if="conversationTitleToEditId === conversation.id"
+                                class="flex flex-1 items-center gap-1"
+                            >
+                                <input
+                                    :placeholder="conversation.title || 'New Chat'"
+                                    @click="e => e.stopPropagation()"
+                                    ref="conversationTitleToEditInput"
+                                    v-model="conversationTitleToEditValue"
+                                    class="flex-1 -ml-1 px-1 bg-white/5 rounded-sm text-white/80 text-sm truncate focus:outline-none"
+                                />
+                                <span class="flex items-center">
+                                    <button
+                                        @click="updateConversationTitleHandler"
+                                        class="flex items-center justify-center text-white/30 hover:text-white/60 transition duration-300 ease-in-out"
+                                        :disabled="!!processingController"
+                                        :class="{ 'cursor-not-allowed': !!processingController }"
+                                    >
+                                        <Icon name="bx:bx-check" class="text-lg relative -top-px"/>
+                                    </button>
+                                    <button
+                                        @click="cancelEditConversationTitle"
+                                        class="flex items-center justify-center text-white/30 hover:text-white/60 transition duration-300 ease-in-out"
+                                        :disabled="!!processingController"
+                                        :class="{ 'cursor-not-allowed': !!processingController }"
+                                    >
+                                        <Icon name="bx:bx-x" class="text-lg"/>
+                                    </button>
+                                </span>
+                            </span>
+                            <span
+                                v-else
+                                class="flex-1 truncate flex items-center gap-1"
+                            >
+                                {{ conversation.title || 'New Chat' }}
+                                <button
+                                    @click="e => startEditConversationTitle(conversation.id, e)"
+                                    class="flex items-center justify-center text-white/30 hover:text-white/60 transition duration-300 ease-in-out"
+                                    :disabled="!!processingController"
+                                    :class="{ 'cursor-not-allowed': !!processingController }"
+                                >
+                                    <Icon name="bx:bx-edit" class="relative top-px"/>
+                                </button>
+                            </span>
                         </span>
                         <span class="text-xs text-white/30 truncate">
                             {{ conversation.id }}
@@ -155,10 +229,10 @@ const clearConversationsHandler = () => {
                         <span class="text-xs text-white/40">
                             {{ (new Date(conversation.updatedAt)).toLocaleString() }}
                         </span>
-                    </button>
+                    </div>
                     <button
                         @click="deleteConversationHandler(conversation.id)"
-                        class="flex items-center justify-center px-3 text-white/30 hover:text-white/60"
+                        class="flex items-center justify-center px-3 text-white/30 hover:text-white/60 transition duration-300 ease-in-out"
                         :disabled="!!processingController"
                         :class="{ 'cursor-not-allowed': !!processingController }"
                     >

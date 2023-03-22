@@ -14,16 +14,36 @@ marked.setOptions({
     xhtml: true,
     breaks: true,
     gfm: true,
-    highlight: (code, lang) => {
-        try {
-            return hljs.highlightAuto(code).value;
-        } catch {
-            const language = hljs.getLanguage(lang) ? lang : 'plaintext';
-            return hljs.highlight(code, { language }).value;
-        }
-    },
-    langPrefix: 'hljs language-',
 });
+const renderer = {
+    code(code, lang) {
+        let language = 'plaintext';
+        let highlightedCode;
+        try {
+            highlightedCode = hljs.highlightAuto(code).value;
+        } catch {
+            language = hljs.getLanguage(lang) ? lang : 'plaintext';
+            highlightedCode = hljs.highlight(code, { language }).value;
+        }
+        const copyButton = `
+<button
+    class="absolute right-0 top-0 pt-1 pr-2 font-sans whitespace-normal flex items-center gap-1"
+    data-is-copy-button="true"
+>
+    <svg
+        class="w-3 h-3 relative top-px"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+    >
+        <path d="M20 2H10c-1.103 0-2 .897-2 2v4H4c-1.103 0-2 .897-2 2v10c0 1.103.897 2 2 2h10c1.103 0 2-.897 2-2v-4h4c1.103 0 2-.897 2-2V4c0-1.103-.897-2-2-2zM4 20V10h10l.002 10H4zm16-6h-4v-4c0-1.103-.897-2-2-2h-4V4h10v10z"></path>
+    </svg>
+    <span class="copy-status">Copy</span>
+</button>`.trim();
+        return `<pre class="p-0 relative">${copyButton}<code class="hljs${language ? ` language-${language}` : ''}">${highlightedCode}</code></pre>`;
+    },
+};
+marked.use({ renderer });
 
 const config = useRuntimeConfig();
 
@@ -367,15 +387,20 @@ const parseMarkdown = (text, streaming = false) => {
         text += '█';
     }
 
-    // convert to markdown
-    let parsed = marked.parse(text);
-    // format Bing's source links more nicely
-    // 1. replace "[^1^]" with "[1]" (during progress streams)
-    parsed = parsed.replace(/\[\^(\d+)\^]/g, '<strong>[$1]</strong>');
-    // 2. replace "^1^" with "[1]" (after the progress stream is done)
-    parsed = parsed.replace(/\^(\d+)\^/g, '<strong>[$1]</strong>');
+    try {
+        // convert to markdown
+        let parsed = marked.parse(text);
+        // format Bing's source links more nicely
+        // 1. replace "[^1^]" with "[1]" (during progress streams)
+        parsed = parsed.replace(/\[\^(\d+)\^]/g, '<strong>[$1]</strong>');
+        // 2. replace "^1^" with "[1]" (after the progress stream is done)
+        parsed = parsed.replace(/\^(\d+)\^/g, '<strong>[$1]</strong>');
 
-    return DOMPurify.sanitize(parsed);
+        return DOMPurify.sanitize(parsed);
+    } catch (err) {
+        console.error('ERROR', err);
+        return text;
+    }
 };
 
 const setIsClientSettingsModalOpen = (isOpen, client = null, presetName = null) => {
@@ -399,15 +424,49 @@ function getMessagesForConversation(conversationMessages, parentMessageId, conve
 }
 
 if (!process.server) {
+    const copyButtonListener = (e) => {
+        // check parent elements for `data-is-copy-button` attribute
+        let el = e.target;
+        while (el) {
+            if (el.dataset.isCopyButton) {
+                // get sibling code block text
+                const codeBlock = el.parentElement.querySelector('code');
+                if (!codeBlock) {
+                    return;
+                }
+                // copy text to clipboard
+                navigator.clipboard.writeText(codeBlock.innerText);
+                // find child element with class `copy-status`
+                const copyStatus = el.querySelector('.copy-status');
+                if (copyStatus) {
+                    // set text to "Copied"
+                    copyStatus.innerText = 'Copied';
+                    setTimeout(() => {
+                        if (!copyStatus) {
+                            return;
+                        }
+                        // set text back to "Copy"
+                        copyStatus.innerText = 'Copy';
+                    }, 3000);
+                }
+                return;
+            }
+            el = el.parentElement;
+        }
+    };
+
     onMounted(() => {
         window.addEventListener('resize', setChatContainerHeight);
         nextTick(() => {
             setChatContainerHeight();
         });
+        // watch for button clicks with attribute `data-clipboard-text`
+        document.addEventListener('click', copyButtonListener);
     });
 
     onUnmounted(() => {
         window.removeEventListener('resize', setChatContainerHeight);
+        document.removeEventListener('click', copyButtonListener);
         stopProcessing();
     });
 

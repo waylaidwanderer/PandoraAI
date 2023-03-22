@@ -349,8 +349,9 @@ const parseMarkdown = (text, streaming = false) => {
     // workaround for incomplete code, closing the block if it's not closed
     // First, count occurrences of "```" in the text
     const codeBlockCount = (text.match(/```/g) || []).length;
+    const shouldAddClosingBlock = codeBlockCount % 2 === 1 && !text.endsWith('```');
     // If the count is odd and the text doesn't end with "```", add a closing block
-    if (codeBlockCount % 2 === 1 && !text.endsWith('```')) {
+    if (shouldAddClosingBlock) {
         if (streaming) {
             text += '█\n```';
             cursorAdded = true;
@@ -358,7 +359,7 @@ const parseMarkdown = (text, streaming = false) => {
             text += '\n```';
         }
     }
-    if (codeBlockCount) {
+    if (codeBlockCount && !shouldAddClosingBlock) {
         // make sure the last "```" is on a newline
         text = text.replace(/```$/, '\n```');
     }

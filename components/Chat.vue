@@ -216,6 +216,12 @@ const sendMessage = async (input, parentMessageId = null) => {
         clientOptions,
     };
 
+    if (typeof activePresetToUse.value?.options?.shouldGenerateTitle === 'undefined') {
+        data.shouldGenerateTitle = true;
+    } else {
+        data.shouldGenerateTitle = activePresetToUse.value?.options?.shouldGenerateTitle;
+    }
+
     if (
         activePresetToUse.value
         && activePresetToUse.value.client === 'bing'

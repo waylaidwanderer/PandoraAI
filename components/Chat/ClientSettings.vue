@@ -33,7 +33,12 @@ const availableOptions = {
     chatgpt: {
         stream: {
             type: 'checkbox',
-            label: 'Stream',
+            label: 'Stream Responses',
+            default: true,
+        },
+        shouldGenerateTitle: {
+            type: 'checkbox',
+            label: 'Automatically Generate Titles',
             default: true,
         },
         clientOptions: {
@@ -121,7 +126,7 @@ const availableOptions = {
     'chatgpt-browser': {
         stream: {
             type: 'checkbox',
-            label: 'Stream',
+            label: 'Stream Responses',
             default: true,
         },
         clientOptions: {
@@ -146,7 +151,7 @@ const availableOptions = {
     bing: {
         stream: {
             type: 'checkbox',
-            label: 'Stream',
+            label: 'Stream Responses',
             default: true,
         },
         jailbreakMode: {
@@ -426,9 +431,9 @@ watch(() => props.client, (client) => {
                                     v-if="saveAsName === defaultSaveAsName"
                                     type="button"
                                     class="
-                                                flex items-center justify-center px-2 py-2 rounded bg-red-500/50 text-white/70
-                                                hover:text-white/90 hover:bg-red-500/60 transition duration-300
-                                            "
+                                        flex items-center justify-center px-2 py-2 rounded bg-red-500/50 text-white/70
+                                        hover:text-white/90 hover:bg-red-500/60 transition duration-300
+                                    "
                                     @click="deletePresetHandler"
                                 >
                                     <Icon name="bx:bx-trash" />
@@ -438,9 +443,9 @@ watch(() => props.client, (client) => {
                             <div class="relative flex flex-col sm:flex-row items-stretch shadow-inner bg-white/5 rounded">
                                 <label
                                     class="
-                                                text-white/60 text-xs h-full flex items-center px-3 py-2 border-white/5
-                                                border-b sm:border-r sm:border-b-0
-                                            "
+                                        text-white/60 text-xs h-full flex items-center px-3 py-2 border-white/5
+                                        border-b sm:border-r sm:border-b-0
+                                    "
                                 >
                                     Preset Name
                                 </label>
@@ -452,9 +457,9 @@ watch(() => props.client, (client) => {
                                 />
                                 <button
                                     class="
-                                                flex items-center justify-center px-3 py-2 group
-                                                bg-white/5 sm:bg-transparent
-                                            "
+                                        flex items-center justify-center px-3 py-2 group
+                                        bg-white/5 sm:bg-transparent
+                                    "
                                     @click="resetSaveAsName"
                                 >
                                     <Icon name="bx:bx-reset" class="text-white/70 group-hover:text-white/90 transition" />
@@ -463,15 +468,19 @@ watch(() => props.client, (client) => {
                             <button
                                 type="button"
                                 class="
-                                            flex items-center justify-center gap-1 py-2
-                                            text-slate-300 rounded bg-white/10
-                                            transition duration-300 ease-in-out
-                                            hover:bg-white/20
-                                        "
+                                    flex items-center justify-center gap-1 py-2
+                                    text-slate-300 rounded bg-white/10
+                                    transition duration-300 ease-in-out
+                                    hover:bg-white/20
+                                "
                                 @click="save"
                             >
                                 <Icon name="bx:bx-save" class="relative text-lg top-[1px] ml-4" /> <span class="mr-4">Save</span>
                             </button>
+                        </div>
+                        <!-- Fine print -->
+                        <div class="mt-2 text-xs text-white/60 text-center sm:text-right">
+                            Any changes to settings will not apply for existing conversations.
                         </div>
                     </DialogDescription>
                 </DialogPanel>

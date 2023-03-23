@@ -186,7 +186,7 @@ const updateConversationTitleHandler = (event) => {
                                     @click="e => e.stopPropagation()"
                                     ref="conversationTitleToEditInput"
                                     v-model="conversationTitleToEditValue"
-                                    class="flex-1 -ml-1 px-1 bg-white/5 rounded-sm text-white/80 text-sm truncate focus:outline-none"
+                                    class="flex-1 -ml-1 px-1 bg-white/5 rounded-sm text-white/80 text-sm truncate focus:outline-none w-full"
                                 />
                                 <span class="flex items-center">
                                     <button

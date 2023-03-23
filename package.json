@@ -33,7 +33,7 @@
     "highlight.js": "^11.7.0",
     "isomorphic-dompurify": "^1.2.0",
     "lodash": "^4.17.21",
-    "marked": "^4.2.12",
+    "marked": "^4.3.0",
     "pinia": "^2.0.33",
     "uuid": "^9.0.0"
   }

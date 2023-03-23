@@ -4,7 +4,7 @@ import GPTIcon from '~/components/Icons/GPTIcon.vue';
 import BingIcon from '~/components/Icons/BingIcon.vue';
 import { usePresetsStore } from '~/stores/presets';
 
-defineProps({
+const props = defineProps({
     presetName: {
         type: String,
         required: true,
@@ -17,11 +17,21 @@ defineProps({
         type: Function,
         required: true,
     },
+    canChangePreset: {
+        type: Boolean,
+        required: true,
+    },
 });
 
 const presetsStore = usePresetsStore();
 const { presets } = storeToRefs(presetsStore);
 const customPresets = computed(() => presets.value.filter(preset => !['OpenAI API', 'ChatGPT', 'Bing'].includes(preset.name)));
+
+const setClientToUseHandler = (clientName) => {
+    if (props.canChangePreset) {
+        props.setClientToUse(clientName);
+    }
+};
 </script>
 
 <template>
@@ -34,9 +44,13 @@ const customPresets = computed(() => presets.value.filter(preset => !['OpenAI AP
         <div class="flex flex-col items-stretch bg-white/10 backdrop-blur-sm overflow-auto max-h-[160px]">
             <div class="w-full flex flex-row">
                 <button
-                    class="px-3 py-1 flex-1 flex flex-row items-center transition ease-in-out hover:bg-white/20 text-sm"
-                    :class="{ 'font-bold': presetName === 'chatgpt' }"
-                    @click="setClientToUse('chatgpt')"
+                    class="px-3 py-1 flex-1 flex flex-row items-center transition ease-in-out text-sm"
+                    :class="{
+                        'font-bold': presetName === 'chatgpt',
+                        'hover:bg-white/20': canChangePreset,
+                        'cursor-not-allowed': !canChangePreset,
+                    }"
+                    @click="setClientToUseHandler('chatgpt')"
                 >
                     <GPTIcon class="h-9 py-2 pr-2 rounded-lg" />
                     OpenAI API
@@ -50,9 +64,13 @@ const customPresets = computed(() => presets.value.filter(preset => !['OpenAI AP
             </div>
             <div class="w-full flex flex-row">
                 <button
-                    class="w-full px-3 py-1 flex flex-row items-center transition ease-in-out hover:bg-white/20 border-t border-white/5 text-sm"
-                    :class="{ 'font-bold': presetName === 'chatgpt-browser' }"
-                    @click="setClientToUse('chatgpt-browser')"
+                    class="w-full px-3 py-1 flex flex-row items-center transition ease-in-out border-t border-white/5 text-sm"
+                    :class="{
+                        'font-bold': presetName === 'chatgpt-browser',
+                        'hover:bg-white/20': canChangePreset,
+                        'cursor-not-allowed': !canChangePreset,
+                    }"
+                    @click="setClientToUseHandler('chatgpt-browser')"
                 >
                     <GPTIcon class="h-9 py-2 pr-2 text-[#6ea194] rounded-lg" />
                     ChatGPT
@@ -66,9 +84,13 @@ const customPresets = computed(() => presets.value.filter(preset => !['OpenAI AP
             </div>
             <div class="w-full flex flex-row">
                 <button
-                    class="w-full px-3 py-1 flex flex-row items-center transition ease-in-out hover:bg-white/20 text-sm border-t border-white/5"
-                    :class="{ 'font-bold': presetName === 'bing' }"
-                    @click="setClientToUse('bing')"
+                    class="w-full px-3 py-1 flex flex-row items-center transition ease-in-out text-sm border-t border-white/5"
+                    :class="{
+                        'font-bold': presetName === 'bing',
+                        'hover:bg-white/20': canChangePreset,
+                        'cursor-not-allowed': !canChangePreset,
+                    }"
+                    @click="setClientToUseHandler('bing')"
                 >
                     <BingIcon class="h-9 py-2 pr-2 rounded-lg" />
                     Bing
@@ -86,9 +108,13 @@ const customPresets = computed(() => presets.value.filter(preset => !['OpenAI AP
                 class="w-full flex flex-row"
             >
                 <button
-                    class="w-full px-3 py-1 flex flex-row items-center transition ease-in-out hover:bg-white/20 text-sm border-t border-white/5"
-                    :class="{ 'font-bold': presetName === preset.name }"
-                    @click="setClientToUse(preset.name)"
+                    class="w-full px-3 py-1 flex flex-row items-center transition ease-in-out text-sm border-t border-white/5"
+                    :class="{
+                        'font-bold': presetName === preset.name,
+                        'hover:bg-white/20': canChangePreset,
+                        'cursor-not-allowed': !canChangePreset,
+                    }"
+                    @click="setClientToUseHandler(preset.name)"
                 >
                     <GPTIcon
                         v-if="preset.client === 'chatgpt'"

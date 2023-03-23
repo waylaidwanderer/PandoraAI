@@ -604,41 +604,33 @@ if (!process.server) {
                         :preset-name="activePresetNameToUse"
                         :set-client-to-use="setActivePresetName"
                         :set-is-client-settings-modal-open="setIsClientSettingsModalOpen"
+                        :can-change-preset="canChangePreset"
                     />
                 </Transition>
                 <button
                     @click="isClientDropdownOpen = !isClientDropdownOpen"
                     class="flex items-center w-10 h-10 my-auto ml-2 justify-center absolute left-0 top-0 bottom-0 z-10"
-                    :disabled="!canChangePreset"
                 >
                     <Transition name="fade" mode="out-in">
                         <GPTIcon
                             v-if="activePresetNameToUse === 'chatgpt' || activePresetToUse?.client === 'chatgpt'"
-                            class="w-10 h-10 p-2 block transition duration-300 ease-in-out rounded-lg"
+                            class="w-10 h-10 p-2 block transition duration-300 ease-in-out rounded-lg hover:bg-black/30 cursor-pointer hover:shadow"
                             :class="{
-                                'opacity-50 cursor-not-allowed': !!processingController,
-                                'opacity-80': !canChangePreset,
-                                'hover:bg-black/30 cursor-pointer hover:shadow': canChangePreset,
                                 'bg-black/30 shadow': isClientDropdownOpen,
                             }"
                         />
                         <GPTIcon
                             v-else-if="activePresetNameToUse === 'chatgpt-browser' || activePresetToUse?.client === 'chatgpt-browser'"
-                            class="w-10 h-10 p-2 text-[#6ea194] block transition duration-300 ease-in-out rounded-lg"
+                            class="w-10 h-10 p-2 text-[#6ea194] block transition duration-300 ease-in-out
+                            rounded-lg hover:bg-black/30 cursor-pointer hover:shadow"
                             :class="{
-                                'opacity-50 cursor-not-allowed': !!processingController,
-                                'opacity-80': !canChangePreset,
-                                'hover:bg-black/30 cursor-pointer hover:shadow': canChangePreset,
                                 'bg-black/30 shadow': isClientDropdownOpen,
                             }"
                         />
                         <BingIcon
                             v-else-if="activePresetNameToUse === 'bing' || activePresetToUse?.client === 'bing'"
-                            class="w-10 h-10 p-2 block transition duration-300 ease-in-out rounded-lg"
+                            class="w-10 h-10 p-2 block transition duration-300 ease-in-out rounded-lg hover:bg-black/30 cursor-pointer hover:shadow"
                             :class="{
-                                'opacity-50 cursor-not-allowed': !!processingController,
-                                'opacity-80': !canChangePreset,
-                                'hover:bg-black/30 cursor-pointer hover:shadow': canChangePreset,
                                 'bg-black/30 shadow': isClientDropdownOpen,
                             }"
                         />

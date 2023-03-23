@@ -92,8 +92,7 @@ const updateConversationTitleHandler = (event) => {
     <div
         class="
             flex flex-col bg-purple-300/10 flex-1 max-w-xs shadow-lg
-            absolute top-0 left-0 h-screen z-50 w-full
-            backdrop-blur-lg
+            absolute top-0 left-0 h-screen z-50 w-full backdrop-blur-lg
             transition-all duration-300 ease-in-out
         "
         :class="{
@@ -111,7 +110,7 @@ const updateConversationTitleHandler = (event) => {
                 <button
                     @click="isMenuOpen = false"
                     class="
-                    bg-purple-300/10 rounded-r backdrop-blur-lg
+                    bg-purple-300/10 rounded-r
                     text-white/50 hover:text-white/80
                     focus:outline-none z-10
                     transition duration-300 ease-in-out

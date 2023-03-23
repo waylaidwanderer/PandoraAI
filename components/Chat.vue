@@ -540,7 +540,7 @@ if (!process.server) {
                     <div
                         class="p-3 rounded-sm"
                         :class="{
-                            'bg-white/10 backdrop-blur-sm shadow': message.role === 'bot',
+                            'bg-white/10 shadow': message.role === 'bot',
                         }"
                     >
                         <!-- role name -->
@@ -580,7 +580,7 @@ if (!process.server) {
                         v-if="processingController"
                         @click="stopProcessing"
                         class="
-                            flex-1 py-2 px-5 bg-white/10 backdrop-blur-sm text-slate-300 text-sm
+                            flex-1 py-2 px-5 bg-white/10 text-slate-300 text-sm
                             shadow rounded transition duration-300 ease-in-out hover:bg-white/20
                         "
                     >
@@ -591,7 +591,7 @@ if (!process.server) {
                         :key="response"
                         @click="sendMessage(response)"
                         class="
-                            flex-1 py-2 px-3 bg-white/10 backdrop-blur-sm text-slate-300 text-sm
+                            flex-1 py-2 px-3 bg-white/10 text-slate-300 text-sm
                             shadow rounded transition duration-300 ease-in-out hover:bg-white/20
                         "
                     >
@@ -644,7 +644,7 @@ if (!process.server) {
                     placeholder="Type your message here..."
                     :disabled="!!processingController"
                     class="
-                        py-4 pl-14 pr-14 rounded-l-sm text-slate-100 w-full bg-white/5 backdrop-blur-sm
+                        py-4 pl-14 pr-14 rounded-l-sm text-slate-100 w-full bg-white/5
                         placeholder-white/40 focus:outline-none resize-none placeholder:truncate
                     "
                     :class="{
@@ -663,9 +663,9 @@ if (!process.server) {
                     title="Regenerate"
                     class="
                         flex items-center flex-1
-                        px-4 text-slate-300 bg-white/5 backdrop-blur-sm
+                        px-4 text-slate-300 bg-white/5
                         transition duration-300 ease-in-out
-                        hover:bg-white/10 hover:backdrop-blur-sm
+                        hover:bg-white/10
                     "
                 >
                     <Icon name="bx:bx-refresh" class="w-7 h-7"/>
@@ -676,12 +676,12 @@ if (!process.server) {
                     :disabled="!!processingController"
                     class="
                         flex items-center flex-1
-                        px-4 text-slate-300 rounded-r-sm bg-white/5 backdrop-blur-sm
+                        px-4 text-slate-300 rounded-r-sm bg-white/5
                         transition duration-300 ease-in-out
                     "
                     :class="{
                         'opacity-50 cursor-not-allowed': !!processingController,
-                        'hover:bg-white/10 hover:backdrop-blur-sm': !processingController,
+                        'hover:bg-white/10': !processingController,
                     }"
                 >
                     <Icon class="w-5 h-5" name="bx:bxs-send" />

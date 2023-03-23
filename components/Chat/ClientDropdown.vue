@@ -66,12 +66,12 @@ onMounted(() => {
 
 <template>
     <div
-        class="flex flex-col absolute bottom-full w-full overflow-hidden"
+        class="flex flex-col absolute bottom-full w-full overflow-hidden backdrop-blur"
     >
-        <div class="flex items-center justify-start gap-2 shadow-sm bg-white/[15%] text-white/80 text-sm backdrop-blur rounded-t py-1 px-3">
+        <div class="flex items-center justify-start gap-2 shadow-sm bg-white/[15%] text-white/80 text-sm rounded-t py-1 px-3">
             Presets
         </div>
-        <div class="presets flex flex-col items-stretch bg-white/10 backdrop-blur-sm overflow-auto max-h-[160px]">
+        <div class="presets flex flex-col items-stretch bg-white/10 overflow-auto max-h-[160px]">
             <div class="w-full flex flex-row">
                 <button
                     class="px-3 py-1 flex-1 flex flex-row items-center transition ease-in-out text-sm"

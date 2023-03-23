@@ -32,6 +32,36 @@ const setClientToUseHandler = (clientName) => {
         props.setClientToUse(clientName);
     }
 };
+
+const scrollToActivePreset = () => {
+    const presetsDiv = document.querySelector('.presets');
+    const activePreset = document.querySelector('.presets .active');
+    if (presetsDiv && activePreset) {
+        // check if active preset is out of view
+        const presetsDivRect = presetsDiv.getBoundingClientRect();
+        const activePresetRect = activePreset.getBoundingClientRect();
+        const topDiff = activePresetRect.top - presetsDivRect.top;
+        const bottomDiff = presetsDivRect.bottom - activePresetRect.bottom;
+        const allowableDiff = 15;
+        if (
+            (topDiff < 0 && Math.abs(topDiff) > allowableDiff)
+            || (bottomDiff < 0 && Math.abs(bottomDiff) > allowableDiff)
+        ) {
+            // scroll to active preset
+            presetsDiv.scrollTop = activePreset.offsetTop - presetsDiv.offsetTop;
+        }
+    }
+};
+
+watch(() => props.presetName, () => {
+    nextTick(() => {
+        scrollToActivePreset();
+    });
+});
+
+onMounted(() => {
+    scrollToActivePreset();
+});
 </script>
 
 <template>
@@ -41,12 +71,12 @@ const setClientToUseHandler = (clientName) => {
         <div class="flex items-center justify-start gap-2 shadow-sm bg-white/[15%] text-white/80 text-sm backdrop-blur rounded-t py-1 px-3">
             Presets
         </div>
-        <div class="flex flex-col items-stretch bg-white/10 backdrop-blur-sm overflow-auto max-h-[160px]">
+        <div class="presets flex flex-col items-stretch bg-white/10 backdrop-blur-sm overflow-auto max-h-[160px]">
             <div class="w-full flex flex-row">
                 <button
                     class="px-3 py-1 flex-1 flex flex-row items-center transition ease-in-out text-sm"
                     :class="{
-                        'font-bold': presetName === 'chatgpt',
+                        'font-bold active': presetName === 'chatgpt',
                         'hover:bg-white/20': canChangePreset,
                         'cursor-not-allowed': !canChangePreset,
                     }"
@@ -66,7 +96,7 @@ const setClientToUseHandler = (clientName) => {
                 <button
                     class="w-full px-3 py-1 flex flex-row items-center transition ease-in-out border-t border-white/5 text-sm"
                     :class="{
-                        'font-bold': presetName === 'chatgpt-browser',
+                        'font-bold active': presetName === 'chatgpt-browser',
                         'hover:bg-white/20': canChangePreset,
                         'cursor-not-allowed': !canChangePreset,
                     }"
@@ -86,7 +116,7 @@ const setClientToUseHandler = (clientName) => {
                 <button
                     class="w-full px-3 py-1 flex flex-row items-center transition ease-in-out text-sm border-t border-white/5"
                     :class="{
-                        'font-bold': presetName === 'bing',
+                        'font-bold active': presetName === 'bing',
                         'hover:bg-white/20': canChangePreset,
                         'cursor-not-allowed': !canChangePreset,
                     }"
@@ -110,7 +140,7 @@ const setClientToUseHandler = (clientName) => {
                 <button
                     class="w-full px-3 py-1 flex flex-row items-center transition ease-in-out text-sm border-t border-white/5"
                     :class="{
-                        'font-bold': presetName === preset.name,
+                        'font-bold active': presetName === preset.name,
                         'hover:bg-white/20': canChangePreset,
                         'cursor-not-allowed': !canChangePreset,
                     }"

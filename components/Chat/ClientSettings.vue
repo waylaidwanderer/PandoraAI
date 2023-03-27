@@ -4,7 +4,7 @@ import {
     DialogTitle,
     DialogDescription,
     DialogPanel,
-    Switch, TransitionRoot,
+    Switch,
 } from '@headlessui/vue';
 import get from 'lodash/get';
 import set from 'lodash/set';
@@ -31,6 +31,16 @@ const props = defineProps({
 
 const availableOptions = {
     chatgpt: {
+        stream: {
+            type: 'checkbox',
+            label: 'Stream Responses',
+            default: true,
+        },
+        shouldGenerateTitle: {
+            type: 'checkbox',
+            label: 'Automatically Generate Titles',
+            default: true,
+        },
         clientOptions: {
             type: 'nested',
             label: 'Client Options',
@@ -114,6 +124,11 @@ const availableOptions = {
         },
     },
     'chatgpt-browser': {
+        stream: {
+            type: 'checkbox',
+            label: 'Stream Responses',
+            default: true,
+        },
         clientOptions: {
             type: 'nested',
             label: 'Client Options',
@@ -134,9 +149,32 @@ const availableOptions = {
         },
     },
     bing: {
+        stream: {
+            type: 'checkbox',
+            label: 'Stream Responses',
+            default: true,
+        },
         jailbreakMode: {
             type: 'checkbox',
             label: 'Jailbreak Mode',
+        },
+        toneStyle: {
+            type: 'select',
+            label: 'Tone Style',
+            options: [
+                {
+                    label: 'Creative',
+                    value: 'creative',
+                },
+                {
+                    label: 'Balanced',
+                    value: 'balanced',
+                },
+                {
+                    label: 'Precise',
+                    value: 'precise',
+                },
+            ],
         },
         clientOptions: {
             type: 'nested',
@@ -212,7 +250,7 @@ const generateForm = (options, parentKey, levels = 0) => Object.entries(options)
             classList = `${classList} shadow-inner bg-white/5 px-3`;
             break;
     }
-    const inputValue = get(formClientOptions.value, optionKey);
+    const inputValue = get(formClientOptions.value, optionKey, option.default);
     let inputElement;
     switch (option.type) {
         case 'textarea':
@@ -242,6 +280,23 @@ const generateForm = (options, parentKey, levels = 0) => Object.entries(options)
                 h('span', {
                     class: `inline-block h-4 w-4 transform rounded-full bg-white transition ${inputValue ? 'translate-x-6' : 'translate-x-1'}`,
                 }),
+            ]);
+            break;
+        case 'select':
+            inputElement = h('select', {
+                value: inputValue,
+                onChange: (e) => {
+                    const targetValue = e.target.value;
+                    if (!targetValue) {
+                        unset(formClientOptions.value, optionKey);
+                    } else {
+                        set(formClientOptions.value, optionKey, targetValue);
+                    }
+                },
+                class: classList,
+            }, [
+                h('option', { value: '' }, 'default server value'),
+                ...option.options.map(_option => h('option', { value: _option.value }, _option.label)),
             ]);
             break;
         default:
@@ -376,9 +431,9 @@ watch(() => props.client, (client) => {
                                     v-if="saveAsName === defaultSaveAsName"
                                     type="button"
                                     class="
-                                                flex items-center justify-center px-2 py-2 rounded bg-red-500/50 text-white/70
-                                                hover:text-white/90 hover:bg-red-500/60 transition duration-300
-                                            "
+                                        flex items-center justify-center px-2 py-2 rounded bg-red-500/50 text-white/70
+                                        hover:text-white/90 hover:bg-red-500/60 transition duration-300
+                                    "
                                     @click="deletePresetHandler"
                                 >
                                     <Icon name="bx:bx-trash" />
@@ -388,9 +443,9 @@ watch(() => props.client, (client) => {
                             <div class="relative flex flex-col sm:flex-row items-stretch shadow-inner bg-white/5 rounded">
                                 <label
                                     class="
-                                                text-white/60 text-xs h-full flex items-center px-3 py-2 border-white/5
-                                                border-b sm:border-r sm:border-b-0
-                                            "
+                                        text-white/60 text-xs h-full flex items-center px-3 py-2 border-white/5
+                                        border-b sm:border-r sm:border-b-0
+                                    "
                                 >
                                     Preset Name
                                 </label>
@@ -402,9 +457,9 @@ watch(() => props.client, (client) => {
                                 />
                                 <button
                                     class="
-                                                flex items-center justify-center px-3 py-2 group
-                                                bg-white/5 sm:bg-transparent
-                                            "
+                                        flex items-center justify-center px-3 py-2 group
+                                        bg-white/5 sm:bg-transparent
+                                    "
                                     @click="resetSaveAsName"
                                 >
                                     <Icon name="bx:bx-reset" class="text-white/70 group-hover:text-white/90 transition" />
@@ -413,15 +468,19 @@ watch(() => props.client, (client) => {
                             <button
                                 type="button"
                                 class="
-                                            flex items-center justify-center gap-1 py-2
-                                            text-slate-300 rounded bg-white/10
-                                            transition duration-300 ease-in-out
-                                            hover:bg-white/20
-                                        "
+                                    flex items-center justify-center gap-1 py-2
+                                    text-slate-300 rounded bg-white/10
+                                    transition duration-300 ease-in-out
+                                    hover:bg-white/20
+                                "
                                 @click="save"
                             >
                                 <Icon name="bx:bx-save" class="relative text-lg top-[1px] ml-4" /> <span class="mr-4">Save</span>
                             </button>
+                        </div>
+                        <!-- Fine print -->
+                        <div class="mt-2 text-xs text-white/60 text-center sm:text-right">
+                            Any changes to settings will not apply for existing conversations.
                         </div>
                     </DialogDescription>
                 </DialogPanel>
@@ -429,3 +488,9 @@ watch(() => props.client, (client) => {
         </div>
     </Dialog>
 </template>
+
+<style>
+select option {
+    @apply text-slate-700;
+}
+</style>

@@ -7,7 +7,9 @@ assignees: ''
 
 ---
 
-ISSUES REPORTED HERE SHOULD BE FOR THE FRONT-END CLIENT ONLY. If you are having problems related to node-chatgpt-api, open an issue there instead.
+ISSUES REPORTED HERE SHOULD BE FOR THE FRONT-END CLIENT ONLY.
+Do NOT create issues regarding any websites that use this client, e.g. https://example-pandora-ai.app. Instead, please contact the website owner directly. 
+If you are having problems related to node-chatgpt-api, open an issue there instead.
 
 **Describe the bug**
 A clear and concise description of what the bug is.

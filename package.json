@@ -28,7 +28,7 @@
   "dependencies": {
     "@headlessui/vue": "^1.7.12",
     "@microsoft/fetch-event-source": "^2.0.1",
-    "@pinia/nuxt": "^0.4.7",
+    "@pinia/nuxt": "^0.4.8",
     "fork-corner": "^2.0.1",
     "highlight.js": "^11.7.0",
     "isomorphic-dompurify": "^1.2.0",

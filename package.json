@@ -23,7 +23,7 @@
     "eslint-plugin-import": "^2.27.5",
     "eslint-plugin-vue": "^9.11.0",
     "nuxt": "^3.4.3",
-    "nuxt-icon": "^0.3.3"
+    "nuxt-icon": "^0.4.0"
   },
   "dependencies": {
     "@headlessui/vue": "^1.7.13",

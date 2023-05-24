@@ -125,6 +125,13 @@ const stopProcessing = () => {
     processingController.value = null;
 };
 
+// Auto adjust the height of input box. The maximum height is half of the window height.
+const setChatInputHeight = () => {
+    const maxHeight = window.innerHeight * 0.5;
+    inputTextElement.value.style.height = 'auto';
+    inputTextElement.value.style.height = `${Math.min(inputTextElement.value.scrollHeight, maxHeight)}px`;
+};
+
 const setChatContainerHeight = () => {
     const headerElementHeight = document.querySelector('header').offsetHeight;
     const footerElementHeight = document.querySelector('footer').offsetHeight;
@@ -141,6 +148,7 @@ const setChatContainerHeight = () => {
     messagesContainerElement.value.style.height = `${containerHeight}px`;
     // move input container element bottom down
     inputContainerElement.value.style.bottom = `${heightOffset}px`;
+    setChatInputHeight();
     scrollToBottom();
 };
 
@@ -642,6 +650,7 @@ if (!process.server) {
                     :rows="inputRows"
                     v-model="message"
                     @keydown.enter.exact.prevent="sendMessage(message)"
+                    @input="setChatInputHeight()"
                     placeholder="Type your message here..."
                     :disabled="!!processingController"
                     class="

@@ -301,7 +301,7 @@ const sendMessage = async (input, parentMessageId = null) => {
     };
 
     if (!stream) {
-        const result = await fetch(`${config.apiBaseUrl}/conversation`, {
+        const result = await fetch(`${config.public.apiBaseUrl}/conversation`, {
             ...opts,
             signal: processingController.value.signal,
         });
@@ -327,7 +327,7 @@ const sendMessage = async (input, parentMessageId = null) => {
     }
 
     try {
-        await fetchEventSource(`${config.apiBaseUrl}/conversation`, {
+        await fetchEventSource(`${config.public.apiBaseUrl}/conversation`, {
             ...opts,
             openWhenHidden: true,
             signal: processingController.value.signal,

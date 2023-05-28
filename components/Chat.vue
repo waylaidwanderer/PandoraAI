@@ -402,7 +402,8 @@ const parseMarkdown = (text, streaming = false) => {
         // 2. replace "^1^" with "[1]" (after the progress stream is done)
         parsed = parsed.replace(/\^(\d+)\^/g, '<strong>[$1]</strong>');
 
-        return DOMPurify.sanitize(parsed);
+        // Allow the iframe to show the images created by Bing Image Creator. 
+        return DOMPurify.sanitize(parsed, { ADD_TAGS: ['iframe'], ADD_ATTR: ['allow', 'allowfullscreen', 'frameborder', 'scrolling', 'srcdoc'] });
     } catch (err) {
         console.error('ERROR', err);
         return text;

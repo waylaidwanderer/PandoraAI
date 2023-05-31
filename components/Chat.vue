@@ -402,7 +402,7 @@ const parseMarkdown = (text, streaming = false) => {
         // 2. replace "^1^" with "[1]" (after the progress stream is done)
         parsed = parsed.replace(/\^(\d+)\^/g, '<strong>[$1]</strong>');
 
-        // Allow the iframe to show the images created by Bing Image Creator. 
+        // Allow the iframe to show the images created by Bing Image Creator.
         return DOMPurify.sanitize(parsed, { ADD_TAGS: ['iframe'], ADD_ATTR: ['allow', 'allowfullscreen', 'frameborder', 'scrolling', 'srcdoc'] });
     } catch (err) {
         console.error('ERROR', err);
@@ -764,5 +764,10 @@ input[type="range"]::-webkit-slider-thumb {
 
 input[type="range"]::-moz-range-thumb {
     @apply w-4 h-4 bg-slate-300 rounded-full;
+}
+
+/* Bing image creator iframe */
+iframe {
+    @apply bg-slate-100;
 }
 </style>

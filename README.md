@@ -69,6 +69,7 @@ Check out the [deployment documentation](https://nuxt.com/docs/getting-started/d
 2. Run the API server from [node-chatgpt-api](https://github.com/waylaidwanderer/node-chatgpt-api#api-server).
 3. Copy `.env.example` to `.env` and fill in the `API_BASE_URL` variable with the URL of the API server.
 4. Run `npm run dev` to start the development server, or `npm run build` to build the application for production.
+   1. If you see an empty white page after pulling the latest changes, run `nuxi upgrade --force` first and then `npm run dev`.
 
 ## Contributing
 If you'd like to contribute to this project, please create a pull request with a detailed description of your changes.

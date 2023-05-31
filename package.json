@@ -31,7 +31,7 @@
     "@pinia/nuxt": "^0.4.11",
     "fork-corner": "^2.0.1",
     "highlight.js": "^11.8.0",
-    "isomorphic-dompurify": "^1.5.0",
+    "isomorphic-dompurify": "^1.6.0",
     "lodash": "^4.17.21",
     "marked": "^5.0.3",
     "pinia": "^2.1.3",

@@ -525,8 +525,8 @@ const copyToClipboard = (message) => {
     }
 }
 
-const deleteMessage = (id) => {
-    messages.value = messages.value.filter((x) => !(x.id == id || x.parentMessageId == id))
+const deleteMessage = (message) => {
+    messages.value = messages.value.filter((x) => !(x.id == message.id || x.parentMessageId == message.id || x.id == message.parentMessageId))
 }
 </script>
 
@@ -575,7 +575,7 @@ const deleteMessage = (id) => {
                             </span>
 
                             <span class="message-functions">
-                                <a href="javascript:;" @click="deleteMessage(message.id)">Delete</a>
+                                <a href="javascript:;" @click="deleteMessage(message)">Delete</a>
                                 <a href="javascript:;" @click="copyToClipboard(message.text)">Copy</a>
                             </span>
                         </div>

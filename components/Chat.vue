@@ -9,6 +9,7 @@ import GPTIcon from '~/components/Icons/GPTIcon.vue';
 import ClientDropdown from '~/components/Chat/ClientDropdown.vue';
 import ClientSettings from '~/components/Chat/ClientSettings.vue';
 import copy from 'copy-to-clipboard';
+import markedKatex from "marked-katex-extension";
 
 marked.setOptions({
     silent: true,
@@ -16,6 +17,8 @@ marked.setOptions({
     breaks: true,
     gfm: true,
 });
+marked.use(markedKatex({throwOnError: true}));
+
 const renderer = {
     code(code, lang) {
         let language = 'plaintext';
@@ -710,6 +713,7 @@ const deleteMessage = (id) => {
     </div>
 </template>
 
+<style src="@/node_modules/katex/dist/katex.min.css"></style>
 <style>
 .messages-move, /* apply transition to moving elements */
 .messages-enter-active {

@@ -26,7 +26,7 @@
     "nuxt-icon": "^0.4.1"
   },
   "dependencies": {
-    "@headlessui/vue": "^1.7.13",
+    "@headlessui/vue": "^1.7.14",
     "@microsoft/fetch-event-source": "^2.0.1",
     "@pinia/nuxt": "^0.4.11",
     "fork-corner": "^2.0.1",

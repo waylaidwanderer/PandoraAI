@@ -29,6 +29,7 @@
     "@headlessui/vue": "^1.7.14",
     "@microsoft/fetch-event-source": "^2.0.1",
     "@pinia/nuxt": "^0.4.11",
+    "copy-to-clipboard": "^3.3.3",
     "fork-corner": "^2.0.1",
     "highlight.js": "^11.8.0",
     "isomorphic-dompurify": "^1.6.0",

@@ -8,6 +8,7 @@ import BingIcon from '~/components/Icons/BingIcon.vue';
 import GPTIcon from '~/components/Icons/GPTIcon.vue';
 import ClientDropdown from '~/components/Chat/ClientDropdown.vue';
 import ClientSettings from '~/components/Chat/ClientSettings.vue';
+import copy from 'copy-to-clipboard';
 
 marked.setOptions({
     silent: true,
@@ -514,6 +515,16 @@ if (!process.server) {
         suggestedResponses.value = [];
     });
 }
+
+const copyToClipboard = (message) => {
+    if (!copy(message)) {
+        prompt("Failed to copy. Please copy manually: ", message)
+    }
+}
+
+const deleteMessage = (id) => {
+    messages.value = messages.value.filter((x) => !(x.id == id || x.parentMessageId == id))
+}
 </script>
 
 <template>
@@ -548,15 +559,22 @@ if (!process.server) {
                         <div
                             class="text-xs text-white/50 mb-1"
                         >
-                            <template v-if="message.role === 'bot'">
-                                {{ activePresetToUse?.options?.clientOptions?.chatGptLabel || 'AI' }}
-                            </template>
-                            <template v-else-if="message.role === 'user'">
-                                {{ activePresetToUse?.options?.clientOptions?.userLabel || 'User' }}
-                            </template>
-                            <template v-else>
-                                {{ message.role }}
-                            </template>
+                            <span class="message-role-name">
+                                <template v-if="message.role === 'bot'">
+                                    {{ activePresetToUse?.options?.clientOptions?.chatGptLabel || 'AI' }}
+                                </template>
+                                <template v-else-if="message.role === 'user'">
+                                    {{ activePresetToUse?.options?.clientOptions?.userLabel || 'User' }}
+                                </template>
+                                <template v-else>
+                                    {{ message.role }}
+                                </template>
+                            </span>
+
+                            <span class="message-functions">
+                                <a href="javascript:;" @click="deleteMessage(message.id)">Delete</a>
+                                <a href="javascript:;" @click="copyToClipboard(message.text)">Copy</a>
+                            </span>
                         </div>
                         <!-- message text -->
                         <div
@@ -769,5 +787,13 @@ input[type="range"]::-moz-range-thumb {
 /* Bing image creator iframe */
 iframe {
     @apply bg-slate-100;
+}
+
+.message-functions {
+    float: right;
+}
+
+.message-functions > a {
+    padding-left: 3pt;
 }
 </style>

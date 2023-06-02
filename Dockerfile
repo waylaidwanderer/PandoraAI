@@ -2,12 +2,18 @@ FROM node:16-alpine
 
 WORKDIR /app
 
+COPY ./package.json ./package-lock.json ./
+
+RUN npm pkg set scripts.postinstall="echo no-postinstall" && npm install
+
 COPY . .
 
-COPY .env .
+COPY .env ./
 
-RUN npm install
+RUN npm run postinstall
 
-EXPOSE 3000 24678
+#RUN sed -i 's#${n.apiBaseUrl}#/api#g' /app/.output/public/_nuxt/entry.*.js
 
-CMD ["npm", "run", "dev"]
+EXPOSE 3000
+
+CMD ["npm", "run", "preview"]

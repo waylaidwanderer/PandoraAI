@@ -576,21 +576,28 @@ const deleteMessage = (message, index) => {
                         >
                             <span class="message-role-name flex-1">
                                 <template v-if="message.role === 'bot'">
+                                    <Icon name="bx:bx-bot"/>
                                     {{ activePresetToUse?.options?.clientOptions?.chatGptLabel || 'AI' }}
                                 </template>
                                 <template v-else-if="message.role === 'user'">
+                                    <Icon name="bx:bx-user"/>
                                     {{ activePresetToUse?.options?.clientOptions?.userLabel || 'User' }}
                                 </template>
                                 <template v-else>
+                                    <Icon name="bx:question-mark"/>
                                     {{ message.role }}
                                 </template>
                             </span>
 
                             <span class="message-functions flex-1">
                                 <a href="javascript:;" class="function-buttons transition duration-300 ease-in-out
-                        hover:bg-white/10" @click="deleteMessage(message, index)">Delete</a>
-                                <a href="javascript:;" class="function-buttons copy-status transition duration-300 ease-in-out
-                        hover:bg-white/10" @click="copyToClipboard(message.text, $event.target)">Copy</a>
+                                    hover:bg-white/10" @click="deleteMessage(message, index)">
+                                    <Icon name="bx:bx-trash"/> Delete
+                                </a>
+                                <a href="javascript:;" class="function-buttons transition duration-300 ease-in-out
+                                    hover:bg-white/10" @click="copyToClipboard(message.text, $event.target)">
+                                    <Icon name="bx:bx-copy"/>&nbsp;<span class="copy-status">Copy</span>
+                                </a>
                             </span>
                         </div>
                         <!-- message text -->

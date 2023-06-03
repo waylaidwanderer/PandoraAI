@@ -526,7 +526,10 @@ const copyToClipboard = (message) => {
 }
 
 const deleteMessage = (message) => {
-    messages.value = messages.value.filter((x) => !(x.id == message.id || x.parentMessageId == message.id || x.id == message.parentMessageId))
+    messages.value = messages.value.filter((x) => !(
+        (x.id == message.id) || 
+        (message.role == 'user' ? x.parentMessageId == message.id : message.parentMessageId == x.id)
+    ))
 }
 </script>
 

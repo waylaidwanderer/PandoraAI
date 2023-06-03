@@ -17,7 +17,7 @@ marked.setOptions({
     breaks: true,
     gfm: true,
 });
-marked.use(markedKatex({throwOnError: true}));
+marked.use(markedKatex({throwOnError: false}));
 
 const renderer = {
     code(code, lang) {

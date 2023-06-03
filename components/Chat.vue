@@ -446,21 +446,8 @@ if (!process.server) {
                     return;
                 }
                 // copy text to clipboard
-                navigator.clipboard.writeText(codeBlock.innerText);
-                // find child element with class `copy-status`
-                const copyStatus = el.querySelector('.copy-status');
-                if (copyStatus) {
-                    // set text to "Copied"
-                    copyStatus.innerText = 'Copied';
-                    setTimeout(() => {
-                        if (!copyStatus) {
-                            return;
-                        }
-                        // set text back to "Copy"
-                        copyStatus.innerText = 'Copy';
-                    }, 3000);
-                }
-                return;
+                copyToClipboard(codeBlock.innerText, el);
+                
             }
             el = el.parentElement;
         }
@@ -519,9 +506,26 @@ if (!process.server) {
     });
 }
 
-const copyToClipboard = (message) => {
+const copyToClipboard = (message, element) => {
+    console.debug("copy message", message)
+    console.debug("copy element", element)
     if (!copy(message)) {
         prompt("Failed to copy. Please copy manually: ", message)
+    }
+    if (element) {
+        const copyStatus = element.querySelector('.copy-status') || element;
+        if (copyStatus) {
+            // set text to "Copied"
+            copyStatus.innerText = 'Copied!';
+            setTimeout(() => {
+                if (!copyStatus) {
+                    return;
+                }
+                // set text back to "Copy"
+                copyStatus.innerText = 'Copy';
+            }, 2000);
+        }
+        return;
     }
 }
 
@@ -563,9 +567,9 @@ const deleteMessage = (message) => {
                     >
                         <!-- role name -->
                         <div
-                            class="text-xs text-white/50 mb-1"
+                            class="flex flex-column text-xs text-white/50 mb-1"
                         >
-                            <span class="message-role-name">
+                            <span class="message-role-name flex-1">
                                 <template v-if="message.role === 'bot'">
                                     {{ activePresetToUse?.options?.clientOptions?.chatGptLabel || 'AI' }}
                                 </template>
@@ -577,9 +581,11 @@ const deleteMessage = (message) => {
                                 </template>
                             </span>
 
-                            <span class="message-functions">
-                                <a href="javascript:;" @click="deleteMessage(message)">Delete</a>
-                                <a href="javascript:;" @click="copyToClipboard(message.text)">Copy</a>
+                            <span class="message-functions flex-1">
+                                <a href="javascript:;" class="function-buttons transition duration-300 ease-in-out
+                        hover:bg-white/10" @click="deleteMessage(message)">Delete</a>
+                                <a href="javascript:;" class="function-buttons copy-status transition duration-300 ease-in-out
+                        hover:bg-white/10" @click="copyToClipboard(message.text, $event.target)">Copy</a>
                             </span>
                         </div>
                         <!-- message text -->
@@ -797,10 +803,12 @@ iframe {
 }
 
 .message-functions {
-    float: right;
+    text-align: right;
 }
 
-.message-functions > a {
-    padding-left: 3pt;
+.function-buttons {
+    margin-left: 2pt;
+    padding: 1pt;
 }
+
 </style>

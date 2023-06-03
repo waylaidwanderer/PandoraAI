@@ -17,7 +17,12 @@ You may also use PandoraAI with other API server implementations as long as the 
 - Choose between different clients or custom presets.  
 ![Client Dropdown](demos/client-dropdown.png)
 - Everything is stored in local storage, so you can use this client without an account, and it can be imported or exported to other devices.
-
+- Some extra features:
+  - Support for deleting messages and copying Markdown sources
+  - Support for rendering LaTeX formula
+  - Typing preview
+  - Dockerfile optimization
+  - UI icon beautify
 <details>
 <summary><strong>Nuxt 3 Setup</strong></summary>
 

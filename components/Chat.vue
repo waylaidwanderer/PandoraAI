@@ -561,51 +561,72 @@ const deleteMessage = (message, index) => {
             <TransitionGroup name="messages">
                 <div
                     class="max-w-4xl w-full mx-auto message"
-                    v-for="(message, index) in messages"
-                    :key="message.id || index"
                 >
-                    <div
-                        class="p-3 rounded-sm"
-                        :class="{
-                            'bg-white/10 shadow': message.role === 'bot',
-                        }"
-                    >
-                        <!-- role name -->
+                    <template v-for="(message, index) in messages" :key="message.id || index">
                         <div
-                            class="flex flex-column text-xs text-white/50 mb-1"
+                            class="p-3 rounded-sm"
+                            :class="{
+                                'bg-white/10 shadow': message.role === 'bot',
+                            }"
                         >
-                            <span class="message-role-name flex-1">
-                                <template v-if="message.role === 'bot'">
-                                    <Icon name="bx:bx-bot"/>
-                                    {{ activePresetToUse?.options?.clientOptions?.chatGptLabel || 'AI' }}
-                                </template>
-                                <template v-else-if="message.role === 'user'">
-                                    <Icon name="bx:bx-user"/>
-                                    {{ activePresetToUse?.options?.clientOptions?.userLabel || 'User' }}
-                                </template>
-                                <template v-else>
-                                    <Icon name="bx:question-mark"/>
-                                    {{ message.role }}
-                                </template>
-                            </span>
+                            <!-- role name -->
+                            <div
+                                class="flex flex-column text-xs text-white/50 mb-1"
+                            >
+                                <span class="message-role-name flex-1">
+                                    <template v-if="message.role === 'bot'">
+                                        <Icon name="bx:bx-bot"/>
+                                        {{ activePresetToUse?.options?.clientOptions?.chatGptLabel || 'AI' }}
+                                    </template>
+                                    <template v-else-if="message.role === 'user'">
+                                        <Icon name="bx:bx-user"/>
+                                        {{ activePresetToUse?.options?.clientOptions?.userLabel || 'User' }}
+                                    </template>
+                                    <template v-else>
+                                        <Icon name="bx:question-mark"/>
+                                        {{ message.role }}
+                                    </template>
+                                </span>
 
-                            <span class="message-functions flex-1">
-                                <a href="javascript:;" class="function-buttons transition duration-300 ease-in-out
-                                    hover:bg-white/10" @click="deleteMessage(message, index)">
-                                    <Icon name="bx:bx-trash"/> Delete
-                                </a>
-                                <a href="javascript:;" class="function-buttons transition duration-300 ease-in-out
-                                    hover:bg-white/10" @click="copyToClipboard(message.text, $event.target)">
-                                    <Icon name="bx:bx-copy"/>&nbsp;<span class="copy-status">Copy</span>
-                                </a>
-                            </span>
+                                <span class="message-functions flex-1">
+                                    <a href="javascript:;" class="function-buttons transition duration-300 ease-in-out
+                                        hover:bg-white/10" @click="deleteMessage(message, index)">
+                                        <Icon name="bx:bx-trash"/> Delete
+                                    </a>
+                                    <a href="javascript:;" class="function-buttons transition duration-300 ease-in-out
+                                        hover:bg-white/10" @click="copyToClipboard(message.text, $event.target)">
+                                        <Icon name="bx:bx-copy"/>&nbsp;<span class="copy-status">Copy</span>
+                                    </a>
+                                </span>
+                            </div>
+                            <!-- message text -->
+                            <div
+                                class="prose prose-sm prose-chatgpt break-words max-w-6xl"
+                                v-html="(message.role === 'user' || message.raw) ? parseMarkdown(message.text) : parseMarkdown(message.text, true)"
+                            />
                         </div>
-                        <!-- message text -->
-                        <div
-                            class="prose prose-sm prose-chatgpt break-words max-w-6xl"
-                            v-html="(message.role === 'user' || message.raw) ? parseMarkdown(message.text) : parseMarkdown(message.text, true)"
-                        />
-                    </div>
+                    </template>
+                    <template v-if="message !== ''">
+                        <div class="p-3 rounded-sm">
+                            <!-- role name -->
+                            <div
+                                class="flex flex-column text-xs text-white/50 mb-1"
+                            >
+                                <span class="message-role-name flex-1">
+                                    <Icon name="bx:user-voice"/>
+                                    Typing...
+                                </span>
+
+                                <span class="message-functions flex-1">
+                                </span>
+                            </div>
+                            <!-- message text -->
+                            <div
+                                class="prose prose-sm prose-chatgpt break-words max-w-6xl"
+                                v-html="parseMarkdown(message)"
+                            />
+                        </div>
+                    </template>
                 </div>
             </TransitionGroup>
         </div>

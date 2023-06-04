@@ -8,6 +8,8 @@ import BingIcon from '~/components/Icons/BingIcon.vue';
 import GPTIcon from '~/components/Icons/GPTIcon.vue';
 import ClientDropdown from '~/components/Chat/ClientDropdown.vue';
 import ClientSettings from '~/components/Chat/ClientSettings.vue';
+import copy from 'copy-to-clipboard';
+import markedKatex from "marked-katex-extension";
 
 marked.setOptions({
     silent: true,
@@ -15,6 +17,8 @@ marked.setOptions({
     breaks: true,
     gfm: true,
 });
+marked.use(markedKatex({throwOnError: false}));
+
 const renderer = {
     code(code, lang) {
         let language = 'plaintext';
@@ -442,21 +446,8 @@ if (!process.server) {
                     return;
                 }
                 // copy text to clipboard
-                navigator.clipboard.writeText(codeBlock.innerText);
-                // find child element with class `copy-status`
-                const copyStatus = el.querySelector('.copy-status');
-                if (copyStatus) {
-                    // set text to "Copied"
-                    copyStatus.innerText = 'Copied';
-                    setTimeout(() => {
-                        if (!copyStatus) {
-                            return;
-                        }
-                        // set text back to "Copy"
-                        copyStatus.innerText = 'Copy';
-                    }, 3000);
-                }
-                return;
+                copyToClipboard(codeBlock.innerText, el);
+                
             }
             el = el.parentElement;
         }
@@ -514,6 +505,41 @@ if (!process.server) {
         suggestedResponses.value = [];
     });
 }
+
+const copyToClipboard = (message, element) => {
+    console.debug("copy message", message)
+    console.debug("copy element", element)
+    if (!copy(message)) {
+        prompt("Failed to copy. Please copy manually: ", message)
+    }
+    if (element) {
+        const copyStatus = element.querySelector('.copy-status') || element;
+        if (copyStatus) {
+            // set text to "Copied"
+            copyStatus.innerText = 'Copied!';
+            setTimeout(() => {
+                if (!copyStatus) {
+                    return;
+                }
+                // set text back to "Copy"
+                copyStatus.innerText = 'Copy';
+            }, 2000);
+        }
+        return;
+    }
+}
+
+const deleteMessage = (message, index) => {
+    if (typeof message.id !== 'undefined') {
+        messages.value = messages.value.filter((x, i) => !(
+            (x.id == message.id) || 
+            (message.role === 'user' ? x.parentMessageId == message.id : message.parentMessageId == x.id)
+        ));
+    }
+    else {
+        messages.value = message.role === 'user' ? messages.value.filter((_, i) => !(i == index || i == index + 1)) : messages.value.filter((_, i) => !(i == index || i == index - 1));
+    }
+}
 </script>
 
 <template>
@@ -535,35 +561,72 @@ if (!process.server) {
             <TransitionGroup name="messages">
                 <div
                     class="max-w-4xl w-full mx-auto message"
-                    v-for="(message, index) in messages"
-                    :key="message.id || index"
                 >
-                    <div
-                        class="p-3 rounded-sm"
-                        :class="{
-                            'bg-white/10 shadow': message.role === 'bot',
-                        }"
-                    >
-                        <!-- role name -->
+                    <template v-for="(message, index) in messages" :key="message.id || index">
                         <div
-                            class="text-xs text-white/50 mb-1"
+                            class="p-3 rounded-sm"
+                            :class="{
+                                'bg-white/10 shadow': message.role === 'bot',
+                            }"
                         >
-                            <template v-if="message.role === 'bot'">
-                                {{ activePresetToUse?.options?.clientOptions?.chatGptLabel || 'AI' }}
-                            </template>
-                            <template v-else-if="message.role === 'user'">
-                                {{ activePresetToUse?.options?.clientOptions?.userLabel || 'User' }}
-                            </template>
-                            <template v-else>
-                                {{ message.role }}
-                            </template>
+                            <!-- role name -->
+                            <div
+                                class="flex flex-column text-xs text-white/50 mb-1"
+                            >
+                                <span class="message-role-name flex-1">
+                                    <template v-if="message.role === 'bot'">
+                                        <Icon name="bx:bx-bot"/>
+                                        {{ activePresetToUse?.options?.clientOptions?.chatGptLabel || 'AI' }}
+                                    </template>
+                                    <template v-else-if="message.role === 'user'">
+                                        <Icon name="bx:bx-user"/>
+                                        {{ activePresetToUse?.options?.clientOptions?.userLabel || 'User' }}
+                                    </template>
+                                    <template v-else>
+                                        <Icon name="bx:question-mark"/>
+                                        {{ message.role }}
+                                    </template>
+                                </span>
+
+                                <span class="message-functions flex-1">
+                                    <a href="javascript:;" class="function-buttons transition duration-300 ease-in-out
+                                        hover:bg-white/10" @click="deleteMessage(message, index)">
+                                        <Icon name="bx:bx-trash"/> Delete
+                                    </a>
+                                    <a href="javascript:;" class="function-buttons transition duration-300 ease-in-out
+                                        hover:bg-white/10" @click="copyToClipboard(message.text, $event.target)">
+                                        <Icon name="bx:bx-copy"/>&nbsp;<span class="copy-status">Copy</span>
+                                    </a>
+                                </span>
+                            </div>
+                            <!-- message text -->
+                            <div
+                                class="prose prose-sm prose-chatgpt break-words max-w-6xl"
+                                v-html="(message.role === 'user' || message.raw) ? parseMarkdown(message.text) : parseMarkdown(message.text, true)"
+                            />
                         </div>
-                        <!-- message text -->
-                        <div
-                            class="prose prose-sm prose-chatgpt break-words max-w-6xl"
-                            v-html="(message.role === 'user' || message.raw) ? parseMarkdown(message.text) : parseMarkdown(message.text, true)"
-                        />
-                    </div>
+                    </template>
+                    <template v-if="message !== ''">
+                        <div class="p-3 rounded-sm">
+                            <!-- role name -->
+                            <div
+                                class="flex flex-column text-xs text-white/50 mb-1"
+                            >
+                                <span class="message-role-name flex-1">
+                                    <Icon name="bx:user-voice"/>
+                                    Typing...
+                                </span>
+
+                                <span class="message-functions flex-1">
+                                </span>
+                            </div>
+                            <!-- message text -->
+                            <div
+                                class="prose prose-sm prose-chatgpt break-words max-w-6xl"
+                                v-html="parseMarkdown(message)"
+                            />
+                        </div>
+                    </template>
                 </div>
             </TransitionGroup>
         </div>
@@ -692,6 +755,7 @@ if (!process.server) {
     </div>
 </template>
 
+<style src="@/node_modules/katex/dist/katex.min.css"></style>
 <style>
 .messages-move, /* apply transition to moving elements */
 .messages-enter-active {
@@ -770,4 +834,14 @@ input[type="range"]::-moz-range-thumb {
 iframe {
     @apply bg-slate-100;
 }
+
+.message-functions {
+    text-align: right;
+}
+
+.function-buttons {
+    margin-left: 2pt;
+    padding: 1pt;
+}
+
 </style>

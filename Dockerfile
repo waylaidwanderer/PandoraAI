@@ -1,13 +1,20 @@
-FROM node:16-alpine
+FROM node:18-alpine
 
 WORKDIR /app
 
+COPY ./package.json ./package-lock.json ./
+
+RUN npm pkg set scripts.postinstall="echo no-postinstall" && npm install
+
 COPY . .
 
-COPY .env .
+RUN npm run postinstall
 
-RUN npm install
+RUN npm run build
 
-EXPOSE 3000 24678
+EXPOSE 3000
 
-CMD ["npm", "run", "dev"]
+# You should use -e to override this default value
+ENV NUXT_PUBLIC_API_BASE_URL=/api
+
+CMD ["npm", "run", "preview"]

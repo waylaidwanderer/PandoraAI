@@ -17,7 +17,12 @@ You may also use PandoraAI with other API server implementations as long as the 
 - Choose between different clients or custom presets.  
 ![Client Dropdown](demos/client-dropdown.png)
 - Everything is stored in local storage, so you can use this client without an account, and it can be imported or exported to other devices.
-
+- Some extra features:
+  - Support for deleting messages and copying Markdown sources
+  - Support for rendering LaTeX formula
+  - Typing preview
+  - Dockerfile optimization
+  - UI icon beautify
 <details>
 <summary><strong>Nuxt 3 Setup</strong></summary>
 
@@ -67,9 +72,19 @@ Check out the [deployment documentation](https://nuxt.com/docs/getting-started/d
 
 1. Follow the Nuxt 3 setup instructions above.
 2. Run the API server from [node-chatgpt-api](https://github.com/waylaidwanderer/node-chatgpt-api#api-server).
-3. Copy `.env.example` to `.env` and fill in the `API_BASE_URL` variable with the URL of the API server.
+3. Copy `.env.example` to `.env` and fill in the `NUXT_PUBLIC_API_BASE_URL` variable with the URL of the API server.
 4. Run `npm run dev` to start the development server, or `npm run build` to build the application for production.
    1. If you see an empty white page after pulling the latest changes, run `nuxi upgrade --force` first and then `npm run dev`.
+
+### Docker Setup
+Build the image, such as `docker build -t pandora-ai .`.
+
+Run:
+```shell
+docker run --name pandora-ai -it -d -p 3000:3000 -e NUXT_PUBLIC_API_BASE_URL=http://node-chatgpt-api/ pandora-ai
+```
+
+Make sure you override the `NUXT_PUBLIC_API_BASE_URL` environment variable.
 
 ## Contributing
 If you'd like to contribute to this project, please create a pull request with a detailed description of your changes.
